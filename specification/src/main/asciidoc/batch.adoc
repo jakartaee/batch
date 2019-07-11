@@ -1,0 +1,15 @@
+== Introduction
+
+The Jakarta Batch project describes the XML-based job specification language (JSL), Java programming model, and runtime environment for batch applications for the Java(TM) platform.
+
+The specification ties together the Java API and the JSL (XML) allowing a job designer to compose a job in XML from Java application artifacts and conveniently parameterize them with values for an individual job.
+This structure promotes application reuse of artifacts across different jobs.
+
+Some key features:
+
+- *checkpoint / restart* - The application read-process-write loop is performed under a global transaction, one "batch" or "chunk" of data at a time, with the batch implementation atomically storing a "checkpoint" at the end.  This checkpoint provides an index into the data stream which allows you to restart a job after an earlier execution hits a failure (or is stopped), such that picks up where you left off (at the checkpointed value).
+- *steps* - jobs can be composed of steps to allow reuse of step logic and definitions within multiple jobs, as well as to faciliate restart (at the step the job left off at).
+- *XML configuration* - Configuration is externalized from Java code into XML and parameterized through a variety of "job property" substitutions.  As one example, this allows database lock tuning (for locks held during the duration of the chunk transaction) to be tuned without touching Java code.
+- *partitions* - The read-process-write loop can be broken up into multiple units running in parallel against different segments of the input data.
+
+The specification allows the flexibility for batch jobs to be scheduled or orchestrated in any number of ways, and stops short of defining any APIs or constructs regarding scheduling or orchestration of multiple or repeated jobs.
