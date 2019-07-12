@@ -8,18 +8,18 @@ The Jakarta Batch project describes the XML-based job specification language
 (JSL), Java programming model, and runtime environment for batch applications
 for the Java platform.
 
-* https://projects.eclipse.org/projects/ee4j.jakartabatch
+* https://projects.eclipse.org/projects/ee4j.batch
 
 ## Developer resources
 
 Information regarding source code management, builds, coding standards, and
 more.
 
-* https://projects.eclipse.org/projects/ee4j.jakartabatch/developer
+* https://projects.eclipse.org/projects/ee4j.batch/developer
 
 The project maintains the following source code repositories:
 
-https://github.com/eclipse-ee4j/batch-spec
+https://github.com/eclipse-ee4j/batch-api
 https://github.com/eclipse-ee4j/batch-tck
 
 ## Eclipse Contributor Agreement

@@ -2,7 +2,7 @@
 
 This content is produced and maintained by the Eclipse Jakarta Batch project.
 
-* Project home: https://projects.eclipse.org/projects/ee4j.jakartabatch
+* Project home: https://projects.eclipse.org/projects/ee4j.batch
 
 ## Trademarks
 
@@ -26,7 +26,7 @@ SPDX-License-Identifier: Apache-2.0
 
 The project maintains the following source code repositories:
 
-https://github.com/eclipse-ee4j/batch-spec
+https://github.com/eclipse-ee4j/batch-api
 https://github.com/eclipse-ee4j/batch-tck
 
 ## Third-party Content
