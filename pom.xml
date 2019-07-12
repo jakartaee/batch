@@ -17,6 +17,12 @@
    SPDX-License-Identifier: Apache-2.0
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.eclipse.ee4j</groupId>
+        <artifactId>project</artifactId>
+        <version>1.0.5</version>
+        <relativePath/>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>jakarta.batch</groupId>
     <artifactId>batch-api-parent</artifactId>
@@ -44,11 +50,14 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+
     <scm>
-        <url>git://github.com/eclipse-ee4j/batch-api</url>
-        <connection>scm:git://github.com/eclipse-ee4j/batch-api</connection>
-        <developerConnection>scm:git://github.com/eclipse-ee4j/batch-api</developerConnection>
+        <connection>scm:git:https://github.com/eclipse-ee4j/batch-api.git</connection>
+        <developerConnection>scm:git:https://github.com/eclipse-ee4j/batch-api.git</developerConnection>
+        <url>https://github.com/eclipse-ee4j/batch-api</url>
+        <tag>master</tag>
     </scm>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
@@ -58,7 +67,9 @@
             <id>ossrh</id>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
+        <downloadUrl>https://github.com/eclipse-ee4j/batch-api</downloadUrl>
     </distributionManagement>
+
     <developers>
         <developer>
             <id>scottkurz</id>
