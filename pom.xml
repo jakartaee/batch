@@ -135,6 +135,22 @@
                 </plugins>
             </build>
         </profile>
+        <!-- Activate with `mvn ... install -DtestStagedDependencies` -->
+        <profile>
+            <id>staged-dependencies</id>
+            <activation>
+                <property>
+                    <name>testStagedDependencies</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/staging/</url>
+                </repository>
+            </repositories>
+        </profile>
     </profiles>
 
     <properties>
@@ -146,7 +162,7 @@
         <!-- Dependencies -->
         <version.jakarta.enterprise.jakarta.enterprise.cdi-api>2.0.1</version.jakarta.enterprise.jakarta.enterprise.cdi-api>
         <version.javax.enterprise.cdi-api>1.1</version.javax.enterprise.cdi-api>
-        <version.javax.inject.javax.inject>1</version.javax.inject.javax.inject>
+        <version.jakarta.inject.jakarta.inject-api>1.0</version.jakarta.inject.jakarta.inject-api>
 
         <version.org.sonatype.plugins.nexus-staging-maven-plugin>1.6.6</version.org.sonatype.plugins.nexus-staging-maven-plugin>
         <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
@@ -179,9 +195,9 @@
                 <version>${version.jakarta.enterprise.jakarta.enterprise.cdi-api}</version>
             </dependency>
             <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>javax.inject</artifactId>
-                <version>${version.javax.inject.javax.inject}</version>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>${version.jakarta.inject.jakarta.inject-api}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
