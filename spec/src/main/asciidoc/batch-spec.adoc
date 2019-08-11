@@ -5,7 +5,6 @@
 = Jakarta Batch
 :authors: Jakarta Batch Team, https://projects.eclipse.org/projects/ee4j.batch
 :email: https://dev.eclipse.org/mailman/listinfo/jakartabatch-dev
-:version-label!:
 :doctype: book
 :license: Eclipse Foundation Specification License v1.0
 :source-highlighter: coderay

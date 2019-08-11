@@ -17,12 +17,14 @@
    SPDX-License-Identifier: Apache-2.0
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <parent>
         <groupId>org.eclipse.ee4j</groupId>
         <artifactId>project</artifactId>
         <version>1.0.5</version>
         <relativePath/>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>jakarta.batch</groupId>
     <artifactId>batch-api-parent</artifactId>
@@ -88,7 +90,9 @@
         </developer>
     </developers>
 
-    <!-- Activate PGP signing only when performing a release -->
+    <!-- Setup issue with GPG agent on Windows makes me need to run this first to "prime" the GPG agent in order 
+         to then use the preferred mechanism of -Poss-release, from the parent.  Not a huge deal, but hopefully
+         can be removed to make things a bit cleaner when this usage issue is figured out. -->
     <profiles>
         <profile>
             <id>perform-release</id>
@@ -104,7 +108,7 @@
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-gpg-plugin</artifactId>
-                            <version>${version.org.apache.maven.plugins.maven-gpg-plugin}</version>
+                            <version>1.4</version>
                         </plugin>
                     </plugins>
                 </pluginManagement>
@@ -122,34 +126,8 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${version.org.sonatype.plugins.nexus-staging-maven-plugin}</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        </configuration>
-                    </plugin>
                 </plugins>
             </build>
-        </profile>
-        <!-- Activate with `mvn ... install -DtestStagedDependencies` -->
-        <profile>
-            <id>staged-dependencies</id>
-            <activation>
-                <property>
-                    <name>testStagedDependencies</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <repositories>
-                <repository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/content/repositories/staging/</url>
-                </repository>
-            </repositories>
         </profile>
     </profiles>
 
@@ -168,7 +146,6 @@
         <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
         <version.org.apache.maven.plugins.maven-compiler-plugin>2.0.2</version.org.apache.maven.plugins.maven-compiler-plugin>
         <version.org.apache.maven.plugins.maven-failsafe-plugin>2.18</version.org.apache.maven.plugins.maven-failsafe-plugin>
-        <version.org.apache.maven.plugins.maven-gpg-plugin>1.4</version.org.apache.maven.plugins.maven-gpg-plugin>
         <version.org.apache.maven.plugins.maven-jar-plugin>2.4</version.org.apache.maven.plugins.maven-jar-plugin>
         <version.org.apache.maven.plugins.maven-javadoc-plugin>2.9.1</version.org.apache.maven.plugins.maven-javadoc-plugin>
         <version.org.apache.maven.plugins.maven-resources-plugin>2.7</version.org.apache.maven.plugins.maven-resources-plugin>
