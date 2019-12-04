@@ -1,0 +1,2205 @@
+== Job Specification Language
+Job Specification Language (JSL) specifies a job, its steps, and
+directs their execution. The JSL for JSR 352 is implemented with XML and
+will be henceforth referred to as "Job XML".
+
+=== Job
+The 'job' element identifies a job.
+
+Syntax:
+
+[source,xml]
+----
+ <job id="{name}" restartable="{true|false}">
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|id |Specifies the logical _name_ of the job and is used for
+identification purposes. It must be a valid XML string value. This is a
+required attribute.
+
+|restartable |Specifies whether or not this job is restartable . It must
+specify _true_ or _false_. This is an optional attribute. The default is
+_true._
+|=======================================================================
+
+==== Job Level Listeners
+
+Job level listeners may be configured to a job in order to intercept job
+execution. The listener element may be specified as child element of the
+job element for this purpose. Job listener is the only listener type
+that may be specified as a job level listener.
+
+Multiple listeners may be configured on a job. However, there is no guarantee of the order in which they are invoked.
+
+Syntax:
+
+[source,xml]
+----
+ <listeners>
+  <listener ref="{name}">
+  ...
+ </listeners>
+----
+
+Where:
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+==== Job Level Exception Handling
+
+Any unhandled exception thrown by a job-level listener causes the job to
+terminate with a batch status of FAILED. In this context, "unhandled"
+simply means an exception thrown by the listener back to the runtime
+implementation.
+
+==== Job Level Properties
+
+The 'properties' element may be specified as a child element of the job
+element. It is used to expose properties to any batch artifact belonging
+to the job and also to the batch runtime. Any number of properties may
+be specified. Job level properties are available through the JobContext
+runtime object. See section xref:_batch_contexts[9.4] for further information about Job
+Context.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+   <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+=== Step
+The 'step' element identifies a job step and its characteristics. Step
+is a child element of job. A job may contain any number of steps. Each
+step may be either a chunk type step or batchlet type step. See section
+xref:_chunk[8.2.1] for information on chunk type steps and section xref:_batchlet[8.2.2] for
+information on batchlet type steps.
+
+Syntax:
+
+[source,xml]
+----
+ <step id="{name}"
+       start-limit="{integer}"
+       allow-start-if-complete ="{true|false}"
+       next="{flow-id|step-id|split-id|decision-id}">
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|id |Specifies the logical _name_ of the step and is used for
+identification purposes. It must be a valid XML string value. This is a
+required attribute.
+
+|start-limit |Specifies the number of times this step may be started or
+restarted. It must be a valid XML integer value. This is an optional
+attribute. The default is 0, which means no limit. If the limit is
+exceeded, the job is placed in the FAILED state.
+
+|allow-start-if-complete |Specifies whether this step is allowed to
+start during job restart, even if the step completed in a previous
+execution. It must be _true_ or _false_. A value of _true_ means the
+step is allowed to restart. This is an optional attribute. The default
+is _false_.
+
+|next |Specifies the next step, flow, split, or decision to run after
+this step is complete. It must be a valid XML string value. This is an
+optional attribute. The default is this step is the last step in the job
+or flow. Note: next attributes cannot be specified such that a loop
+occurs among steps.
+|=======================================================================
+
+==== Chunk
+
+The 'chunk' element identifies a chunk type step. It is a child element
+of the step element. A chunk type step is periodically checkpointed by
+the batch runtime according to a configured checkpoint policy. Items
+processed between checkpoints are referred to as a "chunk". A single
+call is made to the ItemWriter per chunk. Each chunk is processed in a
+separate transaction. See section xref:_transactionality[9.7] for more details on
+transactionality. A chunk that is not complete is restartable from its
+last checkpoint. A chunk that is complete and belongs to a step
+configured with allow-start-if-complete=true runs from the beginning
+when restarted.
+
+Syntax:
+
+[source,xml]
+----
+ <chunk checkpoint-policy="\{item|custom}"
+  item-count="{value}"
+  time-limit="{value}"
+  skip-limit="{value}"
+  retry-limit="{value}" />
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|checkpoint-policy |Specifies the checkpoint policy that governs commit
+behavior for this chunk. Valid values are: "item" or "custom". The
+"item" policy means the chunk is checkpointed after a specified number
+of items are processed. The "custom" policy means the chunk is
+checkpointed according to a checkpoint algorithm implementation.
+Specifying "custom" requires that the checkpoint-algorithm element is
+also specified. See section 8.2.1.5 for checkpoint-algorithm. It is an
+optional attribute. The default policy is "item".
+
+|item-count |Specifies the number of items to process per chunk when
+using the item checkpoint policy. It must be valid XML integer. It is an
+optional attribute. The default is 10. The item-count attribute is
+ignored for "custom" checkpoint policy.
+
+|time-limit |Specifies the amount of time in seconds before taking a
+checkpoint for the item checkpoint policy. It must be valid XML integer.
+It is an optional attribute. The default is 0, which means no limit.
+When a value greater than zero is specified, a checkpoint is taken when
+time-limit is reached or item-count items have been processed, whichever
+comes first. The time-limit attribute is ignored for "custom" checkpoint
+policy.
+
+|skip-limit |Specifies the number of exceptions a step will skip if any
+configured skippable exceptions are thrown by chunk processing. It must
+be a valid XML integer value. It is an optional attribute. The default
+is no limit.
+
+|retry-limit |Specifies the number of times a step will retry if any
+configured retryable exceptions are thrown by chunk processing. It must
+be a valid XML integer value. It is an optional attribute. The default
+is no limit.
+|=======================================================================
+
+===== Reader
+
+The 'reader' element specifies the item reader for a chunk step. It is a
+child element of the 'chunk' element. A chunk step must have one and
+only one item reader.
+
+Syntax:
+
+[source,xml]
+----
+ <reader ref="{name}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+====== Reader Properties
+
+The 'properties' element may be specified as a child element of the
+reader element. It is used to pass property values to a item reader. Any
+number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+  <properties>
+    <property name="{property-name}" value="{name-value}"/>
+  </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+===== Processor
+
+The 'processor' element specifies the item processor for a chunk step.
+It is a child element of the 'chunk' element. The processor element is
+optional on a chunk step. Only a single processor element may be
+specified.
+
+Syntax:
+
+[source,xml]
+----
+ <processor ref="{name}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+====== Processor Properties
+
+The 'properties' element may be specified as a child element of the
+processor element. It is used to pass property values to a item
+processor. Any number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+===== Writer
+
+The 'writer' element specifies the item writer for a chunk step. It is a
+child element of the 'chunk' element. A chunk type step must have one
+and only one item writer.
+
+Syntax:
+
+[source,xml]
+----
+ <writer ref="{name}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+====== Writer Properties
+
+The 'properties' element may be specified as a child element of the
+writer element. It is used to pass property values to a item writer. Any
+number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+===== Chunk Exception Handling
+
+By default, when any batch artifact that is part of a chunk type step
+throws an exception to the Batch Runtime, the job execution ends with a
+batch status of FAILED. The default behavior can be overridden for a
+reader, processor, or writer artifact by configuring exceptions to skip
+or to retry. The default behavior can be overridden for the entire step
+by configuring a transition element that matches the step's exit
+status.
+
+====== Skipping Exceptions
+
+The skippable-exception-classes element specifies a set of exceptions
+that chunk processing will skip. This element is a child element of the
+chunk element. It applies to exceptions thrown from the reader,
+processor, and writer batch artifacts of a chunk type step. It also applies
+to exceptions thrown during checkpoint commit processing. A failed
+commit will be treated the same as a failed write. The total number of
+skips is set by the skip-limit attribute on the chunk element. See
+section xref:_chunk[8.2.1] for details on the chunk element.
+
+A given exception will be skipped if it "matches" an include child
+element of the skippable-exception-classes element, though this might be
+negated (and the exception not skipped) if it also "matches" an exclude
+child element of skippable-exception-classes.
+
+The behavior is determined by the "nearest superclass" in the class
+hierarchy.
+
+To elaborate, in this context, "matches" means the following: For an
+include (or exclude) element C with @class attribute value T, an
+exception E "matches" C when either E is of type T or E's type is a
+subclass of T.
+
+When an exception E "matches" both one or more include and one or more
+exclude elements, then there will be one type T1 among all the matching
+include/exclude elements such that all other distinct matching element
+types are superclasses of T1 (because of Java's single inheritance). If
+T1 only occurs in a matching include element then include (skip) this
+exception. If T1 appears in a matching exclude element (even if it also
+appears in a matching include element), then exclude (don't skip) this
+exception.
+
+Optional Skip Listener batch artifacts can be configured to the step. A
+Skip Listener receives control after a skippable exception is thrown by
+the reader, processor, or writer. See section xref:_skip_listener_interfaces[9.2.7] for details on the
+Skip Listener batch interfaces.
+
+Syntax:
+
+[source,xml]
+----
+ <skippable-exception-classes>
+  <include class="{class name}"/>
+  <exclude class="{class name}"/>
+ </skippable-exception-classes>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|include class |Specifies the class name of an exception or exception
+superclass to skip. It must be a fully qualified class name. Multiple
+instances of the include element may be specified. The include child
+element is optional. However, when specified, the class attribute is
+required.
+
+|exclude class |Specifies a class name of an exception or exception
+superclass to not skip. 'Exclude class' reduces the number of exceptions
+eligible to skip as specified by 'include class'. It must be a fully
+qualified class name. Multiple instances of the exclude element may be
+specified. The exclude child element is optional. However, when
+specified, the class attribute is required.
+|=======================================================================
+
+Example:
+
+[source,xml]
+----
+ <skippable-exception-classes>
+  <include class="java.lang.Exception"/>
+  <exclude class="java.io.FileNotFoundException"/>
+ </skippable-exception-classes>
+----
+
+The preceding example would skip all exceptions except
+`java.io.FileNotFoundException`, (along with any subclasses of
+`java.io.FileNotFoundException`).
+
+====== Retrying Exceptions
+
+The retryable-exception-classes element specifies a set of exceptions
+that chunk processing will retry. This element is a child element of the
+chunk element. It applies to exceptions thrown from the reader,
+processor, or writer batch artifacts of a chunk type step. It also
+applies to exceptions thrown by checkpoint commit processing. The total
+number of retry attempts is set by the retry-limit attribute on the
+chunk element. See section xref:_chunk[8.2.1] for details on the chunk element.
+
+The list of exceptions that will be retried (or not retried) is
+specified in the retryable-exception-classes element on the child
+include element. This list, however, may be modified using one or more
+child exclude elements. The rules for deciding whether to retry or not
+retry a given exception when a combination of include and exclude
+elements are used are analogous to the rules described in the discussion
+in section 8.2.1.4.1 for skipping exceptions.
+
+Optional Retry Listener batch artifacts can be configured on the step. A
+Retry Listener receives control after a retryable exception is thrown by
+the reader, processor, or writer. See section xref:_retrylistener_interface[9.2.8] for details on the
+Retry Listener batch artifact.
+
+
+Syntax:
+
+[source,xml]
+----
+ <retryable-exception-classes>
+  <include class="{class name}"/>
+  <exclude class="{class name}"/>
+ </retryable-exception-classes>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|include class |Specifies a class name of an exception or exception
+superclass to retry. It must be a fully qualified class name. Multiple
+instances of the include element may be specified. The include child
+element is optional. However, when specified, the class attribute is
+required.
+
+|exclude class |Specifies a class name of an exception or exception
+superclass to not retry. 'Exclude class' reduces the number of
+exceptions eligible for retry as specified by 'include class'. It must
+be a fully qualified class name. Multiple instances of the include
+element may be specified. The exclude child element is optional.
+However, when specified, the class attribute is required.
+|=======================================================================
+
+Example:
+
+[source,xml]
+----
+ <retryable-exception-classes>
+  <include class="java.io.IOException"/>
+  <exclude class="java.io.FileNotFoundException"/>
+ </retryable-exception-classes>
+----
+
+The result is that all IOExceptions except `FileNotFoundException` (and
+its subclasses) would be retried.
+
+====== Retry and Skip the Same Exception
+
+When the same exception is specified as both retryable and skippable,
+retryable takes precedence over skippable during regular processing of
+the chunk. While the chunk is retrying, skippable takes precedence over
+retryable since the exception is already being retried.
+
+This allows an exception to initially be retried for the entire chunk
+and then skipped if it recurs. When retrying with default retry behavior
+(see section 8.2.1.4.4) the skips can occur for individual items, since
+the retry is done with an item-count of 1.
+
+====== Default Retry Behavior - Rollback
+
+When a retryable exception occurs, the default behavior is for the batch
+runtime to rollback the current chunk and re-process it with an
+item-count of 1 and a checkpoint policy of item. If the optional
+ChunkListener is configured on the step, the onError method is called
+before rollback. The default retry behavior can be overridden by
+configuring the no-rollback-exception-classes element. See section
+8.2.1.4.5 for more information on specifying no-rollback exceptions.
+
+====== Preventing Rollback During Retry
+
+The no-rollback-exception-classes element specifies a list of exceptions
+that override the default behavior of rollback for retryable exceptions.
+This element is a child element of the chunk element. If a retryable
+exception is thrown the default behavior is to rollback before retry. If
+an exception is specified as both a retryable and a no-rollback
+exception, then no rollback occurs and the current operation is retried.
+Retry Listeners, if configured, are invoked. See section xref:_retrylistener_interface[9.2.8] for
+details on the Retry Listener batch artifact.
+
+The rules for determining whether a combination of include and exclude
+child elements of no-rollback-exception-classes results in the "no
+rollback" behavior or not are analogous to the rules described in the
+discussion in section 8.2.1.4.1 for skipping exceptions.
+
+Syntax:
+
+[source,xml]
+----
+ <no-rollback-exception-classes>
+  <include class="{class name}"/>
+  <exclude class="{class name}"/>
+ </no-rollback-exception-classes>
+----
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|include class |Specifies a class name of an exception or exception
+superclass for which rollback will not occur during retry processing. It
+must be a fully qualified class name. Multiple instances of the include
+element may be specified. The include child element is optional.
+However, when specified, the class attribute is required.
+
+|exclude class |Specifies a class name of an exception or exception
+superclass for which rollback will occur during retry processing. It
+must be a fully qualified class name. Multiple instances of the include
+element may be specified. The exclude child element is optional.
+However, when specified, the class attribute is required.
+|=======================================================================
+
+===== Checkpoint Algorithm
+
+The checkpoint-algorithm element specifies an optional custom checkpoint
+algorithm. It is a child element of the chunk element. It is valid when
+the chunk element checkpoint-policy attribute specifies the value
+'custom'. A custom checkpoint algorithm may be used to provide a
+checkpoint decision based on factors other than only number of items, or
+amount of time. See section 9.1.1.4 for further information about custom
+checkpoint algorithms.
+
+Syntax:
+
+[source,xml]
+----
+ <checkpoint-algorithm ref="{name}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+====== Checkpoint Algorithm Properties
+
+The 'properties' element may be specified as a child element of the
+checkpoint algorithm element. It is used to pass property values to a
+checkpoint algorithm. Any number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|Name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|Value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+==== Batchlet
+
+The batchlet element specifies a task-oriented batch step. It is
+specified as a child element of the step element. It is mutually
+exclusive with the chunk element. See xref:_batchlet_interface[9.1.2] for further details about
+batchlets. Steps of this type are useful for performing a variety of
+tasks that are not item-oriented, such as executing a command or doing
+file transfer.
+
+Syntax:
+
+[source,xml]
+----
+ <batchlet ref="{name}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|Ref |Specifies the name of a batch artifact.
+|============================================
+
+===== Batchlet Exception Handling
+
+This section is superseded by section xref:_step_exception_handling[8.2.7].
+
+===== Batchlet Properties
+
+The 'properties' element may be specified as a child element of the
+batchlet element. It is used to pass property values to a batchlet. Any
+number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|Name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+==== Step Level Properties
+
+The 'properties' element may be specified as a child element of the step
+element. It is used to expose properties to any step level batch
+artifact and also to the batch runtime. Any number of properties may be
+specified. Step level properties are available through the StepContext
+runtime object. See section xref:_batch_contexts[9.4] for further information about
+StepContext.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+==== Step Level Listeners
+
+Step level listeners may be configured to a job step in order to
+intercept step execution. The listener element may be specified as child
+element of the step element for this purpose. The following listener
+types may be specified according to step type:
+
+* chunk step - step listener, item read listener, item process listener,
+item write listener, chunk listener, skip listener, and retry listener
+* batchlet step - step listener
+
+Multiple listeners may be configured on a step. However, there is no
+guarantee of the order in which they are invoked.
+
+Syntax:
+
+[source,xml]
+----
+ <listeners>
+  <listener ref="{name}">
+  ...
+ </listeners>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+===== Step Level Listener Properties
+
+The 'properties' element may be specified as a child element of the
+step-level listeners element. It is used to pass property values to a
+step listener. Any number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+Example:
+
+[source,xml]
+----
+ <listener ref="{name}">
+  <properties>
+   <property name="Property1" value="Property1-Value"/>
+  </properties>
+ </listener>
+----
+
+==== Step Sequence
+
+The first step, flow, or split defines the first step (flow or split) to
+execute for a given Job XML. "First" means first according to order of
+occurrence as the Job XML document is parsed from beginning to end. The
+'next' attribute on the step, flow, or split defines what executes next.
+The next attribute may specify a step, flow, split, or decision. For the
+purpose of discussing transitioning it is convenient to group these four
+with the term "execution elements". The next attribute is supported on
+step, flow, and split elements. Steps, flows, and decisions may also
+ use the "next" _element_ to specify what executes
+next. The next attribute and next element may not be used in a way that
+allows for looping among job execution elements.
+
+Syntax:
+
+[source,xml]
+----
+ <next on="{exit status}" to="{id}" />
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|on |Specifies an exit status to match to the current next element. It
+must be a valid XML string value. Wildcards of "*" and "" may be used.
+"*" matches zero or more characters. "" matches exactly one character.
+It must match an exit status value in order to have effect. This is a
+required attribute.
+
+|to |Specifies the id of another step, split, flow, or decision, which
+will execute next. It must be a valid XML string value. It must match an
+id of another step, split, flow, or decision in the same job. For a step
+inside a flow, the id must match another step in the same flow. This is
+a required attribute.
+|=======================================================================
+
+See section  xref:_transition_elements[8.6] for more details about transition
+elements and section xref:_transitioning_rules[8.9] for details on transitioning rules.
+
+==== Step Partitioning
+
+A batch step may run as a partitioned step. A partitioned step runs as
+multiple instances of the same step definition across multiple threads,
+one partition per thread. The number of partitions and the number of
+threads is controlled through either a static specification in the Job
+XML or through a batch artifact called a partition mapper. Each
+partition needs the ability to receive unique parameters to instruct it
+which data on which to operate. Properties for each partition may be
+specified statically in the Job XML or through the optional partition
+mapper. Since each thread runs a separate copy of the step, chunking and
+checkpointing occur independently on each thread for chunk type steps.
+
+There is an optional way to coordinate these separate units of work in a
+partition reducer so that backout is possible if one or more partitions
+experience failure. The PartitionReducer batch artifact provides a way
+to do that. A PartitionReducer provides programmatic control over
+logical unit of work demarcation that scopes all partitions of a
+partitioned step.
+
+The partitions of a partitioned step may need to share results with a
+control point to decide the overall outcome of the step. The
+PartitionCollector and PartitionAnalyzer batch artifact pair provide for
+this need.
+
+The 'partition' element specifies that a step is a partitioned step. The
+partition element is a child element of the 'step' element. It is an
+optional element.
+
+Syntax:
+
+[source,xml]
+----
+ <partition>
+----
+
+Example:
+
+The following Job XML snippet shows how to specify a partitioned step:
+
+[source,xml]
+----
+ <step id="Step1">
+  <chunk .../> or <batchlet ... />
+  <partition .../>
+ </step>
+----
+
+===== Partition Plan
+
+A partition plan defines several configuration attributes that affect
+partitioned step execution. A partition plan specifies the number of
+partitions, the number of partitions to execute concurrently, and the
+properties for each partition. A partition plan may be defined in a Job
+XML declaratively or dynamically at runtime with a partition mapper.
+
+The 'plan' element is a child element of the 'partition' element. The
+'plan' element is mutually exclusive with partition mapper element. See
+section xref:_partitionmapper_interface[9.5.1] for further details on partition mapper.
+
+Note the specification does not attempt to guarantee order of partition
+execution with respect to the order within a statically or
+dynamically-defined plan.
+
+Syntax:
+
+[source,xml]
+----
+ <plan partitions="{number}" threads="{number}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|Partitions |Specifies the number of partitions for this partitioned
+step. This is a an optional attribute. The default is 1.
+
+|threads |Specifies the maximum number of threads on which to execute
+the partitions of this step. Note the batch runtime cannot guarantee the
+requested number of threads are available; it will use as many as it can
+up to the requested maximum. This is an optional attribute. The default
+is the number of partitions.
+|=======================================================================
+
+Example:
+
+The following Job XML snippet shows how to specify a step partitioned
+into 3 partitions on 2 threads:
+
+[source,xml]
+----
+ <step id="Step1">
+   <chunk .../>
+   <partition>
+     <plan partitions="3" threads="2"/>
+   </partition>
+ </step>
+----
+
+===== Partition Properties
+
+When defining a statically partitioned step, it is possible to specify
+unique property values to pass to each partition directly in the Job XML
+using the property element. See section xref:_partitionmapper_interface[9.5.1] for further information on
+partition mapper.
+
+Syntax:
+
+[source,xml]
+----
+ <properties partition="_partition-number_">
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|partition |Specifies the logical partition number to which the
+specified properties apply. This must be a non-negative integer value,
+starting at 0.
+
+|name |Specifies a unique property name within the current
+scope . It must be a valid XML string value. If
+it matches a named property in the associated batch artifact, its value
+is assigned to that property. If not, it is ignored. This is a required
+attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+Example:
+
+The following Job XML snippet shows a step of 2 partitions with a unique
+value for the property named "filename" for each partition:
+
+[source,xml]
+----
+ <partition>
+  <plan partitions="2">
+   <properties partition="0">
+    <property name="filename" value="/tmp/file1.txt"/>
+   </properties>
+   <properties partition="1">
+    <property name="filename" value="/tmp/file2.txt"/>
+   </properties>
+  </plan>
+ </partition>
+----
+
+===== Partition Mapper
+
+The partition mapper provides a programmatic means for calculating the
+number of partitions and threads for a partitioned step. The partition
+mapper also specifies the properties for each partition. The mapper
+element specifies a reference to a PartitionMapper batch artifact; see
+section xref:_partitionmapper_interface[9.5.1] for further information. Note the mapper element is
+mutually exclusive with the plan element.
+
+Syntax:
+
+[source,xml]
+----
+ <mapper ref="{name}">
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+Example:
+
+[source,xml]
+----
+ <partition>
+  <mapper ref="MyStepPartitioner"/>
+ </partition>
+----
+
+====== Mapper Properties
+The 'properties' element may be specified as a child element of the
+mapper element. It is used to pass property values to a PartitionMapper
+batch artifact. Any number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+===== Partition Reducer
+
+A partitioned step may execute with an optional partition reducer. A
+partition reducer provides a kind of unit of work demarcation around the
+processing of the partitions. Programmatic interception of the
+partitioned step's lifecycle is possible through the partition reducer.
+The reducer element specifies a reference to a PartitionReducer batch
+artifact; see section xref:_partitionreducer_interface[9.5.2] for further information.
+
+The 'reducer' element is a child element of the 'partition' element.
+
+Syntax:
+
+[source,xml]
+----
+ <reducer ref="{name}">
+----
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+Example:
+
+[source,xml]
+----
+ <partition>
+ <reducer ref="MyStepPartitionReducer"/>
+ </partition>
+----
+
+====== Partition Reducer Properties
+The 'properties' element may be specified as a child element of the
+PartitionReducer element. It is used to pass property values to a
+PartitionReducer batch artifact. Any number of properties may be
+specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+===== Partition Collector
+
+A Partition Collector is useful for sending intermediary results for
+analysis from each partition to the step's Partition Analyzer. A
+separate Partition Collector instance runs on each thread executing a
+partition of the step. The collector is invoked at the conclusion of
+each checkpoint for chunking type steps and again at the end of
+partition; it is invoked once at the end of partition for batchlet type
+steps. A collector returns a Java Serializable object, which is
+delivered to the step's Partition Analyzer. See section xref:_partitionanalyzer_interface[9.5.4] for
+further information about the Partition Analyzer. The collector element
+specifies a reference to a PartitionCollector batch artifact; see
+section xref:_partitioncollector_interface[9.5.3] for further information.
+
+The 'collector' element is a child element of the 'partition' element.
+
+Syntax:
+
+[source,xml]
+----
+ <collector ref="{name}">
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+Example:
+
+[source,xml]
+----
+ <partition>
+  <collector ref="MyStepCollector"/>
+ </partition>
+----
+
+====== Partition Collector Properties
+The 'properties' element may be specified as a child element of the
+collector element. It is used to pass property values to a
+PartitionCollector batch artifact. Any number of properties may be
+specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+===== Partition Analyzer
+
+A Partition Analyzer receives intermediary results from each partition
+sent via the step's Partition Collector. A Partition analyzer runs on
+the step main thread and serves as a collection point for this data. The
+PartitionAnalyzer also receives control with the partition exit status
+for each partition, after that partition ends. An analyzer can be used
+to implement custom exit status handling for the step, based on the
+results of the individual partitions. The analyzer element specifies a
+reference to a PartitionAnalyzer batch artifact; see section xref:_partitionanalyzer_interface[9.5.4] for
+further information.
+
+Syntax:
+
+[source,xml]
+----
+ <analyzer ref="{name}">
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|============================================
+|ref |Specifies the name of a batch artifact.
+|============================================
+
+Example:
+
+[source,xml]
+----
+ <partition>
+  <analyzer ref="MyStepAnalyzer"/>
+ </partition>
+----
+
+====== Partition Analyzer Properties
+The 'properties' element may be specified as a child element of the
+analyzer element. It is used to pass property values to a
+PartitionAnalyzer batch artifact. Any number of properties may be
+specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+
+
+==== Step Exception Handling
+
+Any unhandled exception thrown by any step-level artifact during step
+processing causes the step to terminate with a batch status of FAILED.
+In this context, "unhandled" means an exception thrown by the execution
+of the artifact back to the runtime implementation which does not result
+in a skip or a retry as described in section 8.2.1.4.
+ See section xref:_transitioning_precedence_rules[8.9.2] for complete details on
+transitioning after an unhandled exception.
+
+=== Flow
+
+A flow defines a sequence of execution elements that execute together as
+a unit. When the flow is finished, it is the entire flow that
+transitions to the next execution element. A flow may transition to a
+step, split, decision, or another flow. A flow may contain step, flow,
+decision, and split execution elements. See section xref:_decision[8.5] for more on
+decisions. See section xref:_split[8.4] for more on splits. The execution elements
+within a flow may only transition among themselves; they may not
+transition to elements outside of the flow. A flow may also contain the
+transition elements next, stop, fail, and end. See section xref:_transition_elements[8.6] for more
+on transition elements.
+
+Syntax:
+
+[source,xml]
+----
+ <flow id="{name}"next="{flow-id|step-id|split-id|decision-id}">
+  <step> ... </step> ...
+ </flow>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|id |Specifies the logical _name_ of the flow and is used for
+identification purposes. It must be a valid XML string value. This is a
+required attribute.
+
+|next |Specifies the next step, flow, split, or decision to run after
+this step is complete. It must be a valid XML string value. This is an
+optional attribute. The default is this flow is the last execution
+element in the job. Note: next attributes cannot be specified such that
+a loop occurs among steps.
+|=======================================================================
+
+=== Split
+
+A split defines a set of flows that execute concurrently. A split may
+include only flow elements as children. See section xref:_flow[8.3] for more on
+flows. Each flow runs on a separate thread. The split is finished after
+all flows complete. When the split is finished, it is the entire split
+that transitions to the next execution element. A split may transition
+to a step, flow, decision, or another split.
+
+Syntax:
+
+[source,xml]
+----
+ <split id="{name}"next="{flow-id|step-id|split-id|decision-id}">
+  <flow> ... </flow>
+  ...
+ </split>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|id |Specifies the logical _name_ of the split and is used for
+identification purposes. It must be a valid XML string value. This is a
+required attribute.
+
+|next |Specifies the next step, flow, split, or decision to run after
+this step is complete. It must be a valid XML string value. This is an
+optional attribute. The default is this split is the last execution
+element in the job. Note: next attributes cannot be specified such that
+a loop occurs among steps.
+|=======================================================================
+
+==== Split Termination Processing Incomplete
+
+The effort of the initial 1.0 final release specification to define
+split termination processing is recognized as incomplete. This is
+related to the recognition that flow transitioning is incomplete
+(section xref:_flow_level_transitions[8.9.5]).
+
+As such, there is no well-defined mechanism for "passing back" status
+from the individual child flows of a split and aggregating them into a
+status at the split level. There is, accordingly, no termination based
+on the status of the constituent flows performed after a split
+execution.
+
+However, the implementor must be aware that a split may have a child
+flow where the flow itself or a flows child (step, decision, etc.)
+causes the job execution to terminate. This could be via an end, stop,
+or fail transition element, or via an unhandled exception.
+
+In such a case the job should then cease execution before transitioning
+past the current, containing split, on to the next execution element.
+
+Typically only one such element (in one single flow) would terminate job
+execution, with a corresponding batch and exit status that would then be
+set by the implementation as the job-level batch status and exit status,
+since typically the whole split would be intended to complete.
+
+The spec does not make an effort, then, to define the outcome if more
+than one flow within a split produced a terminating status. A
+suggestion, though, is that a FAILED batch status should be given
+preference to STOPPED, which should be given preference to COMPLETED
+status, and a natural corollary might be to bubble up the associate exit
+status as the job-level exit status as well.
+
+=== Decision
+
+A decision provides a customized way of determining sequencing among
+steps, flows, and splits. The decision element may follow a step, flow,
+or split. A job may contain any number of decision elements. A decision
+element is the target of the "next" attribute from a job-level step,
+flow, split, or another decision. A decision must supply a decider batch
+artifact (see section xref:_decider_interface[9.6]). The decider's purpose is to decide the next
+transition. The decision uses any of the transition elements, stop,
+fail, end, and next elements to select the next transition. See section
+xref:_transition_elements[8.6] for further information on transition elements. The decider return
+value will also be set as the current value of the job exit status, in
+addition to being matched against the decisions own child transition
+elements to decide the next transition.
+
+Syntax:
+
+[source,xml]
+----
+ <decision id="{name}" ref="{ref_-_name}">
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|id |Specifies the logical _name_ of the decision and is used for
+identification purposes. It must be a valid XML string value. This is a
+required attribute.
+
+|ref |Specifies the name of a batch artifact.
+|=======================================================================
+Example:
+
+[source,xml]
+----
+ <decision id="AfterFlow1" ref="MyDecider">
+ ...
+ </decision>
+----
+
+==== Decision Properties
+
+The 'properties' element may be specified as a child element of the
+decision element. It is used to pass property values to a decider. Any
+number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+==== Decision Exception Handling
+
+Any exception thrown by a batch artifact invoked during decision
+handling will end the job with a batch status of FAILED. This exception
+is visible to job-level listeners.
+
+=== Transition Elements
+
+Transition elements may be specified in the containment scope of a step,
+flow, or decision (but not a split) to direct job execution sequence or
+to terminate job execution. There are fo ur
+transition elements:
+
+1.  next - directs execution flow to the next execution element.
+2.  fail - causes a job to end with FAILED batch status.
+3.  end - causes a job to end with COMPLETED batch status.
+4.  stop - causes a job to end with STOPPED batch status.
+
+Fail, end, and stop are considered "terminating elements" because they
+cause a job execution to terminate.
+
+==== Next Element
+The next element is used to transition execution to the next execution element.
+Multiple next elements may be specified in the current containment
+scope.
+Syntax:
+
+[source,xml]
+----
+ <next on="{exit status}" to="{step id_|_flow id_|_split id}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|on |Specifies the exit status value that activates this end element. It
+must be a valid XML string value. Wildcards of "*" and "" may be used.
+"*" matches zero or more characters. "" matches exactly one character.
+It must match an exit status value in order to have effect. This is a
+required attribute.
+
+|to |Specifies the execution element  to which
+to transition after this decision. It must be a valid XML string value.
+This is a required attribute. Note: the to value cannot specify the next
+execution element such that a loop occurs in the batch job.
+|=======================================================================
+Example:
+
+[source,xml]
+----
+<step id="Step1">
+ <next on="*" to="Step2"/>
+</step>
+----
+
+==== Fail Element
+
+The fail element is used to terminate the job at the conclusion of the
+current step or flow. The job  batch status is
+set to FAILED. This does not, however, directly affect the batch status
+of the step containing the fail element.
+ Multiple fail elements may be specified in the
+current containment scope. The fail element is supported as a child of
+the step, flow, and decision elements.
+
+Syntax:
+
+[source,xml]
+----
+ <fail on="{exit status}" exit-status="{exit status}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|on |Specifies the exit status value that activates this fail element.
+It must be a valid XML string value. Wildcards of "*" and "" may be
+used. "*" matches zero or more characters. "" matches exactly one
+character. It must match an exit status value in order to have effect.
+This is a required attribute.
+
+|exit-status |Specifies the new exit status for the job. It
+ must be a valid XML string value. This is an
+optional attribute. If not specified, the job-level exit status is
+unchanged. This attribute does not directly change any step exit status
+(particularly the step which contains  this
+fail element).
+|=======================================================================
+
+Example:
+[source,xml]
+----
+<step id="Step1">
+ <fail on="FAILED" exit-status="EARLY COMPLETION"/>
+</step>
+----
+
+==== End Element
+
+The end element is used to terminate the job at the current step. The
+job  batch status is set to COMPLETED. This does
+not, however, directly affect the batch status of the step containing
+the  end element. Multiple end elements may be
+specified in the current containment scope. The end element is supported
+as a child of the step, flow, and decision elements.
+
+Syntax:
+
+[source,xml]
+----
+ <end on="{exit status}" exit-status="{exit status}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|on |Specifies the exit status value that activates this end element. It
+must be a valid XML string value. Wildcards of "*" and "" may be used.
+"*" matches zero or more characters. "" matches exactly one character.
+It must match an exit status value in order to have effect. This is a
+required attribute.
+
+|exit-status |Specifies the new exit status for the job. It
+ must be a valid XML string value. This is an
+optional attribute. If not specified, the job-level exit status is
+unchanged. This attribute does not directly change any step exit status
+(particularly the step which contains  this end
+element).
+|=======================================================================
+
+Example:
+
+[source,xml]
+----
+ <step id="Step1">
+  <end on="COMPLETED" exit-status="EARLY COMPLETION">
+ </step>
+----
+
+==== Stop Element
+
+The stop element is used to terminate the job after the current step or
+flow. If the stop element matches the exit status, the job-level batch
+status is then set to STOPPED. This does not, however, directly affect
+the batch status of the step containing the
+ .
+Multiple stop elements may be specified in the current containment
+scope. The stop element is supported as a child of step, flow, and
+decision elements.
+
+[source,xml]
+----
+<stop on="{exit status}" exit-status="{exit status}" restart="{step id_|_flow id_|_split id}"/>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|on |Specifies the exit status value that activates this end element. It
+must be a valid XML string value. Wildcards of "*" and "" may be used.
+"*" matches zero or more characters. "" matches exactly one character.
+It must match an exit status value in order to have effect. This is a
+required attribute.
+
+|exit-status |Specifies the exit status for the job. It
+ must be a valid XML string value. This is an
+optional attribute. If not specified, the job-level exit status is
+unchanged. This attribute does not directly change any step exit status
+(particularly the step which contains  this
+stop element).
+
+|restart |Specifies the job-level step, flow, or split at which to
+restart when the job is restarted. It must be a valid XML string value.
+This is an optional attribute.
+|=======================================================================
+
+Example:
+
+[source,xml]
+----
+ <step id="Step1">
+  <stop on="COMPLETED" restart="step2"/>
+ </step>
+----
+
+=== Batch and Exit Status
+
+Batch execution reflects a sequence of state changes, culminating in an
+end state after a job has terminated. These state changes apply to the
+entire job as a whole, as well as to each step within the job. These
+state changes are exposed through the programming model as status
+values. There is both a runtime status value, called "batch status", as
+well as a user-defined value, called "exit status".
+
+A job and each step in a job end with a batch status and exit status
+value. Batch status is set by the batch runtime; exit status may be set
+through the Job XML or by the batch application. The exit status for a
+job  and a step will be initially set to null.
+At the time that the job or step completes execution, if the exit status
+is equal to null, it will then be set by the runtime implementation
+ to the string value of the batch status, which
+will be its final value. The batch and exit status values are available
+in the JobContext and StepContext runtime objects, and the exit status
+can be set explicitly via any batch artifact. The overall batch and exit
+status for the job are available through the JobOperator interface.
+Batch and exit status values are strings. The following batch status
+values are defined:
+
+|=======================================================================
+|Value|Meaning
+|STARTING|Batch job has been passed to the batch runtime for execution through the JobOperator interface start or restart operation. A step has a status of STARTING before it actually begins execution.
+|STARTED|Batch job has begun execution by the batch runtime. A step has a status of STARTED once it has begun execution.
+|STOPPING|Batch job has been requested to stop through the JobOperator interface
+stop operation or by a <stop> element in the Job XML. A step has a
+status of STOPPING as soon as JobOperator.stop receives control.
+|STOPPED|Batch job has been stopped through the JobOperator interface stop
+operation or by a <stop> element in the Job XML. A step has a status of
+STOPPED once it has actually been stopped by the batch runtime.
+|FAILED|Batch job has ended due to an unresolved exception or by a <fail>
+element in the Job XML. A step has a status of FAILED under the same
+conditions.
+|COMPLETED|Batch job has ended normally or by an <end> element in the Job XML. A
+step has a status of COMPLETED under the same conditions.
+|ABANDONED|Batch job has been marked abandoned through the JobOperator interface
+abandon operation. An abandoned job is still visible through the
+JobOperator interface, but is not running, nor can it be restarted. It
+exists only as a matter of history.
+|=======================================================================
+
+A job execution will end under the following conditions:
+
+. A job-level execution element (step, flow, or split) finishes
+execution, without specifying a "next" attribute and without the exit
+status matching any transition elements. (See section xref:_transitioning_precedence_rules[8.9.2] for
+details).  In this case, the batch status is set
+to COMPLETED.
+. A step throws an exception to the batch runtime that does not match
+skip or retry criteria, with the exit status not matching any transition
+elements. In this case, the batch status is set to FAILED. (See section
+xref:_transitioning_precedence_rules[8.9.2] for details).  In the case of partitioned
+or concurrent (split) step execution, all other still-running parallel
+instances are allowed to complete before the job ends with FAILED batch
+status.
+. A step, flow, or decision terminates execution with a stop, end, or
+fail element. In this case, the batch status is STOPPED, COMPLETED, or
+FAILED, respectively .
+
+The batch and exit status of the job is set as follows:
+
+. Batch status is initially set to STARTING by the batch runtime.
+Immediately before starting the first step, the batch runtime sets the
+batch status to STARTED .
+. Exit status can be overridden by any artifact by invoking the exit
+status setter method on the JobContext object.
+. Exit status can be overridden by a decision element.
+. Exit status can be overridden by a terminating transition element on
+a step, flow, or split. See section xref:_transition_elements[8.6].
+. Final batch status is set by the batch runtime depending on the
+outcome of the job. See table above. Exit status is set to the final
+batch status if it was not overridden by any of the override means
+described earlier in this list. Note the last override to set exit
+status during the course of job execution takes precedence over all
+others.
+
+In addition to  these conditions and events
+which are well-defined by this specification, it is also recognized that
+the runtime may be forced to make another transition of job and step
+batch status.
+
+For example, a JVM hang may cause a job to appear in STARTED state even
+though it is no longer running. The specification forbids running
+multiple executions of a given job instance at the same time. In order
+to recover and allow restart it is expect that a batch runtime
+implementation might provide a mechanism to automatically or through
+user intervention mark the appropriate job and step execution(s) as
+FAILED (i.e. set the batch status as FAILED).
+
+The details are left entirely to the implementation, we are just
+recognizing here that this is a valid state transition.
+
+==== Batch and Exit Status for Steps
+
+Step batch status is set initially, and then again at the conclusion of
+the step, by the batch runtime. [line-through]#Step exit status is
+initially set to the same value as batch
+status.#  Step exit status may be set by any
+batch artifact configured to the step by invoking the exit status setter
+method in the StepContext object. See section xref:_batch_contexts[9.4] for further
+information about the StepContext object. Setting the step exit status
+does not alter the execution of the current step, but rather, is
+available to influence the execution of subsequent steps via transition
+elements (see xref:_transition_elements[8.6]) and deciders (see xref:_decider_interface[9.6]). If no batch artifact sets the
+exit status, the batch runtime will default the value to the string form
+of the batch status value of the step when step execution completes.
+An important point to note is that transition elements do not affect the
+batch and exit status of their containing step (for a step with one or
+more child transition elements), but only potentially affect the batch
+and exit status of the job.
+
+Example:
+[source,xml]
+----
+<step id="FS1">
+ <batchlet >
+  <next on="RC0" />
+  <fail on="RC4" exit-status="BAD"/>
+  <fail on="RC8" />
+</step>
+----
+
+Suppose for the above example JSL snippet, FS1s batchlet executes
+normally with an exit status of "RC4". Then step FS1s batch status will
+end up as COMPLETED, and FS1s exit status will end up as "RC4". The jobs
+batch status will end up as FAILED and the jobs exit status will end up
+as "BAD". Likewise, if the batchlet completes with an exit status of
+"RC8" the steps batch and exit status will be COMPLETED and "RC8",
+respectively, while the jobs batch and exit status will be FAILED and
+"FAILED" (assuming the job exit status hasnt been set and defaults in
+this case).
+
+Note the implications for restart processing. For example, a completed
+step wont re-run just because the step includes a transition element
+failing the job on the original step executions exit status. See section
+xref:_supporting_classes[10.8] for more on restart processing.
+
+==== Exit Status for Partitioned Steps
+
+The exit status for a partitioned step follows the same rules as for a
+regular step except for an exit status set by batch artifacts processing
+individual partitions . This means any batch
+artifact running on the main thread of the partitioned step can set the
+steps exit status via the exit status setter method on the StepContext
+object , the same as for a non-partitioned step.E.g. a steps partition
+analyzer, partition reducer, or step listener could each potentially set
+the steps exit status in this simple manner (since each of these
+artifacts run on the initial thread, not the threads processing an
+individual partition). If the exit status is not set it defaults to
+batch status at the end of step execution , the
+same as for a non-partitioned step.
+
+For a partitioned batchlet, each thread processing a partition may
+return a separate exit status. However, these exit status values are
+ignored unless a partition analyzer is used to coalesce these separate
+exit status values into a final exit status value for the step.
+
+The batch runtime maintains a StepContext clone per partition. For a
+partitioned batchlet or chunk, any batch artifact running on any of the
+threads processing a partition would merely set a separate exit status
+through the StepContext clone. These exit status values are ignored
+unless a partition analyzer is used to coalesce these separate exit
+status values into a final exit status value for the step.
+
+=== Job XML Substitution
+
+Job XML supports substitution as part of any attribute value. The
+following expression language is supported on all attributes:
+
+----
+<attribute-value> ::= ' " ' <principle-value-expression>[<default-expression>] ' " '
+
+<principle-value-expression> ::= <value-expression>
+
+<value-expression> ::= "#\{"<operator-expression>"}" | <string-literal>[ <value-expression> ]
+
+<default-expression> ::= ":" <value-expression> ";"
+
+<operator-expression> ::= <operator1> | <operator2> | <operator3> |<operator4> | <operator5>
+
+<operator1> ::= "jobParameters" "[" <target-name> "]"
+
+<operator2> ::= "jobProperties" "[" <target-name> "]"
+
+<operator3> ::= "systemProperties" "[" <target-name> "]"
+
+<operator4> ::= "partitionPlan" "[" <target-name> "]"
+
+<target-name> ::= " ' " <string-literal> " ' "
+
+<string-literal> is a valid XML string value.
+----
+
+==== Substitution Processing Rules
+
+Substitution expressions are processed for both initial job start and on
+job restart. All substitution expressions must be resolved before the
+job can be started or restarted, except for the partitionPlan operator,
+which has deferred resolution - see section 8.8.1.4 for more on that.
+After substitution expression resolution, the resultant XML document
+must be checked for validity, according to the guidelines outlined in
+section xref:_job_specification_language_2[13], Job Specification Language XSD.
+
+A substitution expression may reference a job parameter or a job
+property by specifying the name of the parameter or property through a
+substitution expression operator. This name is referred to generally in
+substitution expression syntax as a "target name". There are four
+substitution operators:
+
+. jobParameters - specifies to use a named parameter from the job
+parameters.
+. jobProperties - specifies to use a named property from among the
+job's properties.
+. systemProperties - specifies to use a named property from the system
+properties.
+. partitionPlan - specifies to use a named property from the partition
+plan of a partitioned step.
+
+===== jobParameters Substitution Operator
+The jobParameters substitution operator resolves to the value of the
+job parameter with the specified target name.
+
+===== jobProperties Substitution Operator
+The jobProperties substitution operator resolves to the value of the
+job property with the specified target name. This property is found by
+recursively searching from the innermost containment scope (this
+includes earlier properties within the current scope) to the outermost
+scope until a property with the specified target name is found.
+
+E.g. The batch runtime would attempt resolution of the jobProperties
+operator specification in each of the two following reader property
+definitions by first searching for earlier property definitions within
+the reader properties collection, then the step properties collection
+(there are none in this example), then the job properties collection (if
+any). The search stops at the first occurrence of the specified target
+name.
+
+[source,xml]
+----
+ <job id="job1">
+  <properties>
+   <property name="filestem" value="postings"/>
+   <property name="outputlog" value="jobmessages"/>
+ </properties>
+ <step id="step1">
+  <chunk>
+    <reader ref="MyReader">
+     <properties>
+      <property name="infile.name" value="#\{jobProperties['filestem']}.txt"/>
+      <property name="outputlog" value="readermessages"/>
+      <property name="outfile.name" value="#\{jobProperties['outputlog']}.txt"/>
+     </properties>
+    </reader>
+  </chunk>
+ </step>
+</job>
+----
+
+The resolved value for reader property "infile.name" would be
+"postings.txt".
+
+The resolved value for reader property "outfile.name" would be
+"readermessages.txt".
+
+===== systemProperties Substitution Operator
+
+The systemProperties substitution operator resolves to the value of the
+system property with the specified target name.
+
+===== partitionPlan Substitution Operator
+
+The partitionPlan substitution operator resolves to the value of the
+partition plan property with the specified target name from the
+PartitionPlan returned by the PartitionMapper. Partition plan properties
+are in scope only for the step to which the partition plan is defined.
+The partitionPlan operator is resolved separately for each partition
+before the partition execution begins.
+
+E.g. Given job, job1:
+
+[source,xml]
+----
+<job id="job1">
+ <step id="step1">
+  <chunk>
+   <reader  ref="MyReader>
+    <properties>
+     <property name="infile.name" value="file#\{partitionPlan['myPartitionNumber']}.txt"/>
+     <property name="outfile.name" value="#\{partitionPlan['outFile']}"/>
+    </properties>
+   </reader>
+   <writer ref="MyWriter"/>
+  </chunk>
+  <partition>
+   <mapper ref="MyMapper "/>
+  </partition>
+ </step>
+</job>
+----
+
+And MyMapper implementation:
+
+[[app-listing]]
+[source,java]
+----
+public class MyMapper implements PartitionMapper \{
+  public PartitionPlan mapPartitions() \{
+    PartitionPlanImpl pp= new PartitionPlanImpl();
+    pp.setPartitions(2);
+
+    Properties p0= new Properties();
+    p0.setProperty("myPartitionNumber", "0");
+    p0.setProperty("outFile", "outFileA.txt");
+
+    Properties p1= new Properties();
+    p1.setProperty("myPartitionNumber", "1");
+    p1.setProperty("outFile", "outFileB.txt");
+
+    Properties[] partitionProperties= new Properties[2];
+    partitionProperties[0]= p0;
+    partitionProperties[1]= p1;
+    pp.setPartitionProperties(partitionProperties);
+
+    return pp;
+  }
+}
+----
+
+The step1 chunk would run as two partitions, with the itemReader
+property "infile.name" resolved to "file0.txt" and "file1.txt" for
+partitions 0 and 1, respectively. Also, itemReader property
+"outfile.name" would resolve to "outFileA.txt", and "outFileB.txt" for
+partitions 0 and 1, respectively.
+
+===== Substitution Expression Default
+
+Substitutions expressions may include a default value using the ":"
+operator. The default is applied if the substitution's principle value
+expression resolves to the empty string "".
+
+===== Property Resolution Rule
+
+Properties specified by a substitution operator must be defined before
+they can be used in a substitution expression.
+
+Examples:
+
+_Resolvable Property Reference_
+
+The batch runtime will resolve a substitution reference to a property
+that occurs before it is referenced. In the following example, property
+"infile.name" is defined before it is used to form the value of property
+"tmpfile.name". This is a resolvable reference.E.g.
+
+[source,xml]
+----
+ <property name="infile.name" value="in.txt" />
+ <property name="tmpfile.name" value="#\{jobProperties['infile.name']}.tmp" />
+----
+
+The batch runtime resolves a resolvable reference with the resolved
+value of the specified property reference.
+
+_Unresolvable Property Reference_
+
+The batch runtime will not resolve a substitution reference to a
+property whose first occurrence is after it is referenced. In the
+following example, property "infile.name" is defined after it is used to
+form the value of property "tmpfile.name". This is a unresolvable
+reference.E.g.
+
+[source,xml]
+----
+ <property name="tmpfile.name" value="in.txt#\{jobProperties[infile.name]}" />
+ <property name="infile.name" value="in.txt" />
+----
+
+The batch runtime resolves an unresolvable reference in XML to the
+empty string "".
+
+===== Undefined Target Name Rule
+A substitution expression operator that specifies an undefined target
+name is assigned the empty string in XML.
+
+===== Job Restart Rule
+Job Parameters may be specified on job restart. Substitution expression
+resolution occurs on each restart. This makes it possible for new values
+to be used in Job XML attributes during job restart. While all
+substitution expressions resolve the same way on restart as on initial
+start, there is a special rule for the number of partitions in a
+partitioned step:
+
+The number of partitions in a partition plan
+
+The batch runtime determines the number of partitions in a partitioned
+step the first time the step is attempted. The batch runtime remembers
+that decision and applies it to that step on the next job execution,
+once the previous job execution is restarted. The decision cannot be
+altered by a substitution expression. The decision can be altered,
+however, through a PartitionMapper artifact by specifying the "override"
+option in the PartitionPlan object. See section 10.9.4 for details on
+the PartitionPlan class.
+
+==== Examples
+[source,xml]
+----
+       <property name="infile.name" value="in.txt" />
+----
+
+Resolved property: infile.name="in.txt"
+
+[source,xml]
+----
+       <property name="infile.name" value="#\{jobParameters['infile.name']}" />
+----
+
+Resolved property: infile.name= value of infile.name job parameter
+
+[source,xml]
+----
+       <property name="infile.name" value="#\{systemProperties['infile.name']}" />
+----
+
+Resolved property: infile.name= value of infile.name system property
+
+[source,xml]
+----
+       <property name="infile.name" value="#\{jobProperties['infile.name']}" />
+----
+
+Resolved property: infile.name= value of infile.name job property
+
+[source,xml]
+----
+       <property name="infile.name" value="#\{partitionPlan['infile.name']}" />
+----
+
+Resolved property: infile.name= value of infile.name from partition
+plan for the current partition
+
+[source,xml]
+----
+       <property name="infile.name" value="#\{jobParameters['infile.name']}:in.txt;" />
+----
+
+Resolved property: infile.name = value of infile.name job parameter or
+"in.txt" if infile.name job parameter is unspecified.
+
+=== Transitioning Rules
+
+==== Combining Transition Elements
+
+Any combination of transition elements can be included at the end of a
+step, flow, or decision definition. Combinations can include zero, one,
+or more than one instance of a single type of execution element,E.g.
+next.
+
+Transition elements are evaluated in sequential order as they occur
+within the JSL document. I.e. the appropriate exit status is compared
+with the on attribute value of the first transition element in the
+sequence and, if it matches, then the corresponding transition is
+perfomed, and the rest of the transition elements are ignored. If not,
+the second transition element is evaluated, etc.
+
+Example:
+[source,xml]
+----
+<step id="Step1">
+ <next on="RC0" to="Step2"/>
+ <next on="RC4" to="Step3"/>
+ <end on="RC4" exit-status="DONE"/>
+ <fail on="*"/> <!-- Matches anything, so only makes sense as last transition element-->
+</step>
+----
+==== Transitioning Precedence Rules
+
+The transition elements are always "evaluated" first, and if a match is
+found, execution transitions accordingly (either to another execution
+element or the job is stopped or failed).
+
+If a match is not found among the transition elements (which would
+always be the case if there are no transition elements), then transition
+proceeds as follows:
+
+1.  If execution resulted in an unhandled exception, then the job ends
+with batch status of FAILED.
+2.  If execution ended normally, and the execution element whose
+execution is completing contains a next attribute, then execution
+transitions to the element named by this next attribute value.
+3.  If execution ended normally, and the execution element whose
+execution is completing does not contain a next attribute, then the job
+ends normally (with COMPLETED batch status). For transitioning from a
+step within a flow, this statement doesnt apply. See section xref:_transitioning_from_within_flows[8.9.4] for
+details.
+
+The following examples illustrate how the above rules might be employed:
+
+Example 1: Transition to Step2, unless exit status of RC_ABORT seen, in
+which case fail the job
+
+[source,xml]
+----
+<step id="Step1" next="Step2">
+ <fail on="RC_ABORT" exit-status="ABORTED"/>
+</step>
+----
+
+Example 2: Transition to Step2, but if exception thrown, transition to
+RecoveryStep.
+
+[source,xml]
+----
+<step id="Step1" next="Step2">
+<!-- Assumes step exit status defaults to step batch status (FAILED)-->
+ <next on="FAILED" to="RecoveryStep"/>
+ <fail on="*"/>
+</step>
+----
+
+Note that the second example shows it is possible for a job to executed
+to COMPLETED status, even though a constituent step ends with FAILED
+batch status (See section xref:_step_exception_handling[8.2.7]).
+
+==== Loop definition
+
+The specification prohibits next and to attribute values that result in
+a "loop". More precisely, this means that no execution element can be
+transitioned to twice within a single job execution.
+
+This wording is purposely written this way rather than merely saying no
+execution element can be executed twice within a single job execution.
+Say "step1" executed to completion during an initial execution which
+ultimately failed, and upon restart we transitioned past "step1" without
+executing it since it had already completed, but we subsequently
+transitioned (back) to "step1". This may only be a single execution of
+"step1" during a single job execution, but it still violates the looping
+prohibition.
+
+The runtime may detect potential loops in an initial validation phase,
+as described in section xref:_validation_rules[13.1], or may only detect loops once they occur.
+
+==== Transitioning From Within Flows
+
+. As mentioned in section xref:_flow[8.3], an execution element which is a child of a
+flow may only transition to another execution element within the same
+flow. The flows transition elements, however, would transition execution
+to the next execution element at the level of the execution scope
+containing the flow ,E.g. the job.
+
+. For terminating transitions (stop, end, fail) as well as failures caused
+by unhandled exceptions, it is the entire job execution which is
+terminated. It is not just the case that the flow alone is somehow
+failed or ended yet with another level of transitioning occurring at the
+containing (e.g. job) level.
+
+.. Note: transition via next outside of the flow is not permitted. If
+this is not detected during job validation (see section xref:_validation_rules[13.1]), then at
+runtime the job execution will end at this point with batch status of
+FAILED.
+
+. When a child of a flow completes normally, and when there are no
+matching transition elements as well as no next attribute at the level
+of this child of a flow, then the flow ends.
+
+Another way of stating rules #2 and #3 in this section would be to say
+that all the rules in section xref:_transitioning_precedence_rules[8.9.2] apply to transitions within flows
+(i.e. among children of flows) and are effective at the job level,
+except for rule #3 in section xref:_transitioning_precedence_rules[8.9.2] (this case does not necessarily end
+the job).
+
+See the example at the end of section xref:_flow_level_transitions[8.9.5] for further clarification.
+
+==== Flow-level Transitions Undefined
+
+It is recognized that the specification is incomplete with respect to
+how exactly flow transition elements are evaluated. Though the list in
+section xref:_partitionplan[10.8.4] has an assertion in rule 3.e. that suggests using the
+exit status of the last contained execution element as a flow-level exit
+status, this does not seem to be a complete definition. For example,
+what if the last execution element within the flow is a split
+
+This might be rectified in a later revision of this specification. In
+the meantime it is suggested to avoid using flow-level transition
+elements in light of this ambiguity.
+
+On the other hand, a transition from a flow via the next attribute of
+the flow element is well-defined at the current spec level, and is
+suggested.
+
+Example:
+[source,xml]
+----
+<flow id="Flow1" next="StepX">
+ <step id="FS1">
+ <next on="RC1" to="FS2A"/>
+ <next on="RC2" to="FS2B"/>
+ <!-- ILLEGAL - would be illegal, since one can only transition within the flow
+ <next on="RC3" to="StepX"/>
+ -->
+ </step>
+ <step id="FS2A" >
+  <fail on="FAILED"/> <!-- FAILS job, doesn't "fail flow"-->
+ </step>
+ <step id="FS2B" >
+  <fail on="FAILED"/> <!-- FAILS job, doesn't "fail flow"-->
+ </step>
+ <next on="F*" to="StepY"/> <!-- UNDEFINED -->
+</flow>
+<step id="StepX">
+
+----
+
+As noted in the comments inline, this example makes the following
+points:
+
+* that a child of a flow can only transition to another child of
+the same flow (Item 1. in section xref:_transitioning_from_within_flows[8.9.4])
+
+* that a terminating transition terminates the job, not just the
+flow somehow (Item 2. in section xref:_transitioning_from_within_flows[8.9.4])
+
+* that a transition element which is a direct child of the flow
+itself is currently UNDEFINED (section xref:_flow_level_transitions[8.9.5])

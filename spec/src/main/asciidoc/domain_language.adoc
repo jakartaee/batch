@@ -1,0 +1,194 @@
+== Domain Language of Batch
+To any experienced batch architect, the overall concepts of batch
+processing used by JSR 352 should be familiar and comfortable. There are
+"Jobs" and "Steps" and developer supplied processing units called
+ItemReaders and ItemWriters. However, because of the JSR 352 operations,
+callbacks, and idioms, there are opportunities for the following:
+
+[loweralpha]
+. significant improvement in adherence to a clear separation of
+concerns
+. clearly delineated architectural layers and services provided as
+interfaces
+. significantly enhanced extensibility
+
+The diagram below is a simplified version of the batch reference
+architecture that has been used for decades. It provides an overview of
+the components that make up the domain language of batch processing.
+This architecture framework is a blueprint that has been proven through
+decades of implementations on the last several generations of platforms
+(COBOL/Mainframe, C++/Unix, and now Java/anywhere). JCL and COBOL
+developers are likely to be as comfortable with the concepts as C++, C#
+and Java developers. JSR 352 specifies the layers, components and
+technical services commonly found in robust, maintainable systems used
+to address the creation of simple to complex batch applications.
+
+image::images/image003.png[image]
+
+The diagram above highlights the key concepts that make up the domain
+language of batch. A Job has one to many steps, which has no more than
+one ItemReader, ItemProcessor, and ItemWriter. A job needs to be
+launched (JobOperator), and meta data about the currently running
+process needs to be stored (JobRepository).
+
+=== Job
+A Job is an entity that encapsulates an entire batch process. A Job
+will be wired together via a Job Specification Language. However, Job is
+just the top of an overall hierarchy:
+
+image::images/image005.png[http://static.springsource.org/spring-batch/trunk/reference/html-single/images/job-heirarchy.png]
+
+With JSR 352, a Job is simply a container for Steps. It combines
+multiple steps that belong logically together in a flow and allows for
+configuration of properties global to all steps, such as restartability.
+The job configuration contains:
+
+1. The simple name of the job
+
+2. Definition and ordering of Steps
+
+3. Whether or not the job is restartable
+
+==== JobInstance
+
+A JobInstance refers to the concept of a logical job run. Let's consider
+a batch job that should be run once at the end of the day, such as the
+'EndOfDay' job from the diagram above. There is one 'EndOfDay' Job, but
+each individual run of the Job must be tracked separately. In the case
+of this job, there will be one logical JobInstance per day. For example,
+there will be a January 1st run, and a January 2nd run. If the January
+1st run fails the first time and is run again the next day, it is still
+the January 1st run. Usually this corresponds with the data it is
+processing as well, meaning the January 1st run processes data for
+January 1st, etc. Therefore, each JobInstance can have multiple
+executions (JobExecution is discussed in more detail below); one or many
+JobInstances corresponding to a particular Job can be running at a given
+time.
+
+The definition of a JobInstance has absolutely no bearing on the data
+that will be loaded. It is entirely up to the ItemReader implementation
+used to determine how data will be loaded. For example, in the EndOfDay
+scenario, there may be a column on the data that indicates the
+'effective date' or 'schedule date' to which the data belongs. So, the
+January 1st run would only load data from the 1st, and the January 2nd
+run would only use data from the 2nd. Because this determination will
+likely be a business decision, it is left up to the ItemReader to
+decide. What using the same JobInstance will determine, however, is
+whether or not the 'state' from previous executions will be available to
+the new run. Using a new JobInstance will mean 'start from the
+beginning' and using an existing instance will generally mean 'start
+from where you left off'.
+
+==== JobParameters
+Job parameters can be specified each time a job is started or restarted.
+Job parameters are keyword/value string pairs. The JobOperator start and
+restart operations support the specification of job parameters. See
+section xref:_joboperator_2[10.4] for further details on JobOperator.
+
+==== JobExecution
+A JobExecution refers to the technical concept of a single attempt to
+run a Job. Each time a job is started or restarted, a new JobExecution
+is created, belonging to the same JobInstance.
+
+=== Step
+A Step is a domain object that encapsulates an independent, sequential
+phase of a batch job. Therefore, every Job is composed entirely of one
+or more steps. A Step contains all of the information necessary to
+define and control the actual batch processing. This is a necessarily
+vague description because the contents of any given Step are at the
+discretion of the developer writing it. A Step can be as simple or
+complex as the developer desires. A simple Step might load data from a
+file into the database, requiring little or no code, depending upon the
+implementations used. A more complex Step may have complicated business
+rules that are applied as part of the processing. As with Job, a Step
+has an individual StepExecution that corresponds with a unique
+JobExecution:
+
+image::images/image007.png[http://static.springsource.org/spring-batch/trunk/reference/html-single/images/jobHeirarchyWithSteps.png]
+
+==== StepExecution
+A StepExecution represents a single attempt to execute a Step. A new
+StepExecution will be created each time a Step is run, similar to
+JobExecution. However, if a step fails to execute because the step
+before it fails, there will be no execution persisted for it. A
+StepExecution will only be created when its Step is actually started.
+
+=== JobOperator
+JobOperator provides an interface to manage all aspects of job
+processing, including operational commands, such as start, restart, and
+stop, as well as job repository related commands, such as retrieval of
+job and step executions. See section xref:_joboperator_2[10.4] for more details about
+JobOperator.
+
+=== Job Repository
+A job repository holds information about jobs currently running and
+jobs that have run in the past. The JobOperator interface provides
+access to this repository. The repository contains job instances, job
+executions, and step executions. For further information on this
+content, see sections 10.9.8, 10.9.9, 10.9.10, respectively.
+
+Note the implementation of the job repository is outside the scope of
+this specification.
+
+=== ItemReader
+
+ItemReader is an abstraction that represents the retrieval of input for
+a Step, one item at a time. An ItemReader provides an indicator when it
+has exhausted the items it can supply. See section 9.1.1.1 for more
+details about ItemReaders.
+
+=== ItemWriter
+
+ItemWriter is an abstraction that represents the output of a Step, one
+batch or chunk of items at a time. Generally, an item writer has no
+knowledge of the input it will receive next, only the item that was
+passed in its current invocation. See section 9.1.1.3 for more details
+about ItemWriters.
+
+=== ItemProcessor
+
+ItemProcessor is an abstraction that represents the business processing
+of an item. While the ItemReader reads one item, and the ItemWriter
+writes them, the ItemProcessor provides access to transform or apply
+other business processing. See section 9.1.1.2 for more details about
+ItemProcessors.
+
+=== Chunk-oriented Processing
+
+JSR 352 specifies a 'Chunk Oriented' processing style as its primary
+pattern. Chunk oriented processing refers to reading the data one item
+at a time, and creating 'chunks' that will be written out, within a
+transaction boundary. One item is read in from an ItemReader, handed to
+an ItemProcessor, and aggregated. Once the number of items read equals
+the commit interval, the entire chunk is written out via the ItemWriter,
+and then the transaction is committed.
+
+image::images/image009.png[http://static.springsource.org/spring-batch/trunk/reference/html-single/images/chunk-oriented-processing.png]
+
+=== Batch Checkpoints
+
+For data intensive batch applications - particularly those that may run
+for long periods of time - checkpoint/restart is a common design
+requirement. Checkpoints allow a step execution to periodically bookmark
+its current progress to enable restart from the last point of
+consistency, following a planned or unplanned interruption.
+
+Checkpoints work naturally with chunk-oriented processing. The end of
+processing for each chunk is a natural point for taking a checkpoint.
+
+JSR 352 specifies runtime support for checkpoint/restart in a generic
+way that can be exploited by any chunk-oriented batch step that has this
+requirement.
+
+Since progress during a step execution is really a function of the
+current position of the input/output data, natural placement of function
+suggests the knowledge for saving/restoring current position is a
+reader/writer responsibility.
+
+Since managing step execution is a runtime responsibility, the batch
+runtime must necessarily understand step execution lifecycle, including
+initial start, execution end states, and restart.
+
+Since checkpoint frequency has a direct effect on lock hold times, for
+lockable resources, tuning checkpoint interval size can have a direct
+bearing on overall system throughput.
