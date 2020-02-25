@@ -9,19 +9,145 @@
 :license: Eclipse Foundation Specification License v1.0
 :source-highlighter: coderay
 :toc: left
-:toclevels: 4
-:sectnumlevels: 4
+:toclevels: 9
+:toc: macro
+:tocplacement: manual
+:sectnums:
+:sectnumlevels: 5
 :sectanchors:
 ifdef::backend-pdf[]
 :pagenums:
 :numbered:
-:title-logo-image: image:jakarta_ee_logo_schooner_color_stacked_default.png[pdfwidth=4.25in,align=right]
+:title-logo-image: image:images/jakarta_ee_logo_schooner_color_stacked_default.png[pdfwidth=4.25in,align=right]
 endif::[]
 
-// == License
-:sectnums!:
+== License
 include::license-efsl.adoc[]
 
-// == Wombat
-:sectnums:
-include::batch.adoc[]
+include::acknowledgements.adoc[]
+
+include::forward.adoc[]
+
+== Table of Contents
+
+toc::[]
+
+include::introduction.adoc[]
+
+include::applicability.adoc[]
+
+include::domain_language.adoc[]
+
+include::job_specification_language.adoc[]
+
+include::batch_programming_model.adoc[]
+
+include::batch_runtime_spec.adoc[]
+
+include::job_runtime_lifecycle.adoc[]
+
+include::batch_xml_xsd.adoc[]
+
+include::job_specification_language_xml.adoc[]
+
+== Credits
+
+Section 7 Domain Language of Batch, was adapted from Spring Batch
+Reference Documentation:
+
+http://static.springsource.org/spring-batch/trunk/reference/html-single/index.html[http://static.springsource.org/spring-batch/trunk/reference/html-single/index.html]
+
+== Change Log
+
+=== Version 1.0 Revision A - Maintenance Release
+
+==== Issues List
+
+Following these links will show each original issue on our official spec
+issues tracking list. In most cases the bug report contains the complete
+text of the spec delta or addition, but not in every single case.
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|https://java.net/bugzilla/show_bug.cgiid=5389[5389] |In Sec. xref:_job_parameters_on_restart[10.7.1],
+should we have said we require a "no-arg" explicit or implicit
+constructor rather than a "default constructor"
+
+|https://java.net/bugzilla/show_bug.cgiid=4827[4827] |SPEC: Misspoke on
+collector role on exit status
+
+|https://java.net/bugzilla/show_bug.cgiid=5490[5490] |Clarify
+JobContext/StepContext properties; fix TCK to not depend on writable
+Properties
+
+|https://java.net/bugzilla/show_bug.cgiid=5431[5431]
+|ItemProcessListener#onProcessError has javadoc from
+ItemProcessListener#afterProcess
+
+|https://java.net/bugzilla/show_bug.cgiid=5498[5498] |Add "mark FAILED"
+to BatchStatus state transitions
+
+|https://java.net/bugzilla/show_bug.cgiid=5370[5370] |Spec is unclear
+whether JobOperator methods may/must execute synchronously or not (with
+TCK implications)
+
+|https://java.net/bugzilla/show_bug.cgiid=5583[5583]
+|CheckpointAlgorithm needs to specify timeunit (seconds) and other
+javadoc fixes
+
+|https://java.net/bugzilla/show_bug.cgiid=5372[5372] |Evaluation order
+of multiple transition elements
+
+|https://java.net/bugzilla/show_bug.cgiid=5691[5691] |"Looping" should
+be clarified
+
+|https://java.net/bugzilla/show_bug.cgiid=5690[5690] |Flow/Split
+transitioning & termination not fully defined
+
+|https://java.net/bugzilla/show_bug.cgiid=5374[5374] |Details of
+exception handling (by container)
+
+|https://java.net/bugzilla/show_bug.cgiid=4830[4830] |xref:_next_element[8.6.1] Transition
+Next Element
+
+|https://java.net/bugzilla/show_bug.cgiid=4865[4865] |SPEC Partition
+Plan example confusing
+
+|https://java.net/bugzilla/show_bug.cgiid=5533[5533] |stop/end/fail
+exit-status should affect job exit status, not step (as claimed in
+spec).
+
+|https://java.net/bugzilla/show_bug.cgiid=5780[5780] |Spec should
+clarify StepExecution values passed to Decider on a restart
+
+|https://java.net/bugzilla/show_bug.cgiid=5373[5373] |Co-existence of
+transition elements with @next attribute PLUS behavior if no transition
+element @on is matched
+
+|https://java.net/bugzilla/show_bug.cgiid=5375[5375] |Spec contradicts
+itself when talking about uninitialized exit status (TCK assumes 'null')
+
+|https://java.net/bugzilla/show_bug.cgiid=4866[4866] |SPEC Partition
+Properties example has a invalid tag
+
+|https://java.net/bugzilla/show_bug.cgiid=5746[5746] |@Inject
+@BatchProperty should work for job level properties
+
+|https://java.net/bugzilla/show_bug.cgiid=5911[5911] |Clarify partition
+restart processing, PartitionPlan properties, and persistent user data
+for partitioned steps.
+
+|https://java.net/bugzilla/show_bug.cgiid=5873[5873] |Clarify when
+CheckpointAlgorithm#beginCheckpoint is invoked
+
+|https://java.net/bugzilla/show_bug.cgiid=5919[5919] |Spec doesn't fully
+describe PartitionPlan override and the use of PartitionMapper
+
+|https://java.net/bugzilla/show_bug.cgiid=5875[5875] |When the first
+readItem() in a chunk return 'null', is this a zero-item chunk or is
+this not a new chunk after all
+
+|https://java.net/bugzilla/show_bug.cgiid=5403[5403] |Spec unclear on
+skipping part of an Exception hierarchy
+|=======================================================================
+

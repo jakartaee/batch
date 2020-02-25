@@ -1,0 +1,1252 @@
+== Batch Runtime Specification
+
+=== Batch Properties Reserved Namespace
+The batch runtime supports properties at job, step, partition, and artifact level. The property name prefix, 'javax.batch', is reserved for
+use by the batch runtime, as prescribed by this specification and future
+revisions of same. Applications and specification implementations must
+not define properties for their own use that begin with this prefix.
+Applications that do so risk undefined behavior.
+
+=== Job Metrics
+
+The batch runtime supports the following chunk-type step metrics:
+
+[arabic]
+.  readCount - the number of items successfully read.
+.  writeCount - the number of items successfully written.
+.  filterCount - the number of items filtered by ItemProcessor.
+.  commitCount - the number of transactions committed.
+.  rollbackCount - the number of transactions rolled back.
+.  readSkipCount - the number of skippable exceptions thrown by the ItemReader.
+.  processSkipCount - the number of skippable exceptions thrown by the ItemProcessor.
+.  writeSkipCount - the number of skippable exceptions thrown by the ItemWriter.
+
+These metrics are available through the StepExecution runtime object.
+See section 10.9.10 for further information on StepExecution.
+
+=== Job Runtime Identifiers
+
+Job runtime artifacts are uniquely defined at runtime with the following
+operational identifiers:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|instanceId |Is a long that represents an instance of a job. A new job
+instance is created everytime a job is started with the JobOperator
+"start" method.
+
+|executionId |Is a long that represents the next attempt to run a
+particular job instance. A new execution is created the first time a job
+is started and everytime thereafter when an existing job execution is
+restarted with the JobOperator "restart" method. Note there can be no
+more than one executionId in the STARTED state at one time for a given
+job instance.
+
+|stepExecutionId |Is a long that represents the attempt to execute a
+particular step within a job execution.
+|=======================================================================
+
+Note instanceId, executionId, and stepExecutionId are all globally
+unique values within a job repository. See section xref:_job_repository[7.4] for explanation
+of job repository.
+
+=== JobOperator
+
+The JobOperator interface provides a set of operations to start, stop,
+restart, and inspect jobs. See 10.9.6 for detailed description of this
+interface. The JobOperator interface is accessible via a factory
+pattern:
+
+ JobOperator jobOper = BatchRuntime.getJobOperator();
+
+See section 10.9.5 for details on the BatchRuntime class.
+
+=== Batch Artifact Loading
+
+All batch artifacts comprising a batch application are loadable by the
+following loaders in the order specified:
+
+1.  Implementation-specific loader +
++
+The batch runtime implementation _may_provide an
+implementation-specific means by which batch artifacts references in a Job XML (i.e. via the 'ref=' attribute) are resolved to an implementation class and instantiated. When the batch runtime resolves a batch artifact reference to an instance the implementation-specific mechanism (if one exists) is attempted first. The loader must return an
+instance or null. +
++
+An example of an implementation-specific loader might be CDI or Spring DI.
+2.  Archive loader +
++
+If an implementation-specific mechanism does not exist or fails toresolve a batch artifact reference (returns null), then the batch
+runtime implementation must resolve the reference with an archive
+loader. The implementation must provide an archive loader that resolves
+the reference by looking up the reference in a `batch.xml` file, which
+maps reference name to implementation class name. The loader must return
+an instance or null. +
++
+The `batch.xml` file is packaged by the developer with the application under the '`META-INF`' directory ('`WEB-INF/classes/META-INF`' for .war files). +
++
+See xref:_job_parameters_on_restart[10.7.1] for more about the `batch.xml` file.
+
+3.  Thread Context Class Loader +
++
+If the archive loader fails to resolve a batch artifact reference (returns null), then the batch runtime implementation must resolve the reference by treating the reference as a class name and loading it through the thread context class loader. The loader must return an instance or null.
+
+=== Job XML Loading
+
+Job XML is specified by name on the JobOperator.start command (see
+10.9.6) to start a job.
+
+All Job XML references are loadable by the following loaders in the
+order specified:
+
+1.  implementation-specific loader +
++
+The batch runtime implementation _must_provide an implementation-specific means by which Job XML references are resolved to a Job XML document. +
++
+The purpose of an implementation-specific loader is to enable Job XMLloading from outside of the application archive, such as from a repository, file system, remote cache, or elsewhere.
+
+2.  archive loader +
++
+If the implementation-specific mechanism does fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive loader. The implementation must provide an archive loader that resolves the reference by looking up the reference
+from the `META-INF/batch-jobs` directory. +
++
+Job XML documents may be packaged by the developer with the application under the '`META-INF/batch-jobs`' directory ('`WEB-INF/classes/META-INF`/batch-jobs' for .war files). +
++
+See xref:_job_xml_substitution_during_restart[10.7.2] for more about the `META-INF/batch-jobs`.
+
+=== Application Packaging Model
+The batch artifacts that comprise a batch application requiring no
+unique packaging. They may be packaged in a standard jar file or can be
+included inside any Java archive type, as supported by the target
+execution platform in question.E.g. batch artifacts may be included in
+wars, EJB jars, etc, so long as they exist in the class loader scope of
+the program initiating the batch jobs (i.e. using the JobOperator start
+method).
+
+==== `META-INF/batch.xml`
+
+A batch application may use the archive loader (see section xref:_job_xml_loading[10.5]) to
+load batch artifacts. The application can direct artifact loading by
+supplying an optional `batch.xml` file. The `batch.xml` file must be stored
+under the `META-INF` directory. For .jar files it is the standard `META-INF`
+directory. For .war files it is the `WEB-INF/classes/META-INF` directory.
+The format and content of the `batch.xml` file follows:
+
+[source,xml]
+----
+<batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+ <ref id="<reference-name>" class="<impl-class-name>" />
+</batch-artifacts>
+----
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|<reference-name> |Specifies the reference name of the batch artifact.
+This is the value that is specified on the ref= attribute of the Job
+XML.
+
+|<impl-class-name> |Specifies the fully qualified class name of the
+batch artifact implementation.
+|=======================================================================
+Notes:
+
+1. If an implementation-specific loader is used (see
+xref:_job_xml_loading[10.5]) any artifact it loads takes precedence over artifacts specified in `batch.xml`.
+
+2. Use of `batch.xml` to load batch artifacts requires the
+availability of a zero-argument constructor (either a default
+constructor or an explicitly-defined, no-arg
+constructor ).
+
+==== `META-INF/batch-jobs`
+
+A batch application may use the archive loader (see section xref:_application_packaging_model[10.6]) to
+load Job XML documents. The application does this by storing the Job XML
+documents under the `META-INF/batch-jobs` directory. For .jar files the
+batch-jobs directory goes under the standard `META-INF` directory. For
+.war files it goes under the `WEB-INF/classes/META-INF` directory. Note
+Job XML documents are valid only in the batch-jobs directory:
+sub-directories are ignored.
+Job XML documents stored under `META-INF/batch-jobs` are named with the
+convention ``<name>.xml`,Where:
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|<name> |Specifies the name of a Job XML. This is the value that is
+specified on the JobOperator.start command.
+
+|.xml |Specifies required file type of a Job XML file under
+`META-INF/batch-jobs`.
+|=======================================================================
+Note if an implementation-specific loader (see xref:_application_packaging_model[10.6]) loads a Job XML
+document that document takes precedence over documents stored under
+`META-INF/batch-jobs`.
+
+=== Restart Processing
+
+The JobOperator restart method is used to restart a JobExecution. A
+JobExecution is eligible for restart if:
+
+* Its batch status is STOPPED or FAILED.
+* It is the most recent JobExecution.
+
+==== Job Parameters on Restart
+
+Job parameter values are not remembered from one execution to the next.
+All Job Parameter substitution during job restart is performed based
+exclusively on the job parameters specified on that restart.
+
+==== Job XML Substitution during Restart
+
+See section 8.8.1.8 Job Restart Rule.
+
+==== Execution Sequence on Restart – Overview
+
+On the initial execution of a JobInstance, the sequence of execution is
+essentially:
+
+[arabic]
+. Start at initial execution element
+. Execute the current execution element
+. Either:
+.. Transition to next execution element (and go to step 2. above) OR
+.. Terminate execution
+
+On a restart, i.e. a subsequent execution of a JobInstance, the sequence
+of execution is similar, but the batch implementation must, in addition,
+determine which steps it does and does not need to re-execute.
+
+So on a restart, the sequence of execution looks like:
+
+[arabic]
+. Start at restart position
+. Decide whether or not to execute (or re-execute) the current execution element
+. Either:
+.. Transition to next execution element (and go to step 2. above) OR
+.. Terminate execution
+
+So it follows that for restart we need: a definition of where in the job
+definition to begin; rules for deciding whether or not to execute the
+current execution element; and rules for performing transitioning,
+especially taking into account that all steps relevant to transitioning
+may not have executed on this (restart) execution. These rules are
+provided below.
+
+==== Execution Sequence on Restart – Detailed Rules
+Upon restart, the job is processed as follows:
+
+[arabic]
+. Job XML Substitution is performed (see section xref:_job_xml_substitution[8.8]).
+. Start by setting the current position to the restart position. The restart position is either:
+.. the execution element identified by the <stop> elements "restart"
+attribute if that is how the previous execution ended; else
+.. the initial execution element determined the same as upon initial
+job start, as described in section xref:_step_sequence[8.2.5] Step Sequence;
+. Determine if the current execution element should re-execute:
+.. If the current execution element is a COMPLETED step that specifies allow-restart-if-complete=false, then transition based on the exit status for this step from the previous completed execution. If the transition is a next transition, then repeat step 3 here with the value of next as the new, "current" execution element. Or, if the transition
+is a terminating transition such as end, stop, or fail, then terminate
+the restart execution accordingly.
+..  If the current execution element is a COMPLETED step that specifies
+allow-restart-if-complete=true, then re-run the step and transition
+based on the new exit status from the new step execution. As above,
+either repeat step 3 with the next execution element or terminate the
+new execution as the transition element
+..   If the current execution element is a
+STOPPED or FAILED step then restart the step and transition based on the
+exit status from the new step execution.+
++
+Note if the step is a partitioned step, only the partitions that did not
+complete previously are restarted. This behavior may be overridden via a
+PartitionMapper (see section xref:_batchruntime[10.8.5]).  Note
+for a partitioned step, the checkpoints and persistent user data are
+loaded from the persistent store on a per-partition basis (this is not a
+new rule, but a fact implied by the discussion of checkpoints in section
+xref:_step_partitioning[8.2.6] and the Step Context in section 9.4.1.1, which is summarized here
+for convenience).
+..  If the current execution element is a decision, execute the decision
+(i.e. execute the Decider) unconditionally. The Deciders "decide" method
+is passed a StepExecution array as a parameter. This array will be
+populated with the most-recently completed StepExecution(s) for each
+corresponding step.E.g. some StepExecution(s) may derive from previous
+job executions and some from the current restart (execution). A single
+decision following a split could even have a mix of old, new
+StepExecution(s) in the same array.
+..  If the current execution element is a flow, transition to the first
+execution element in the flow and perform step 3 with this as the
+current element. When restart processing of the flow has completed, then
+follow the same rules which apply during the original execution (see
+section xref:_transitioning_rules[8.9]) to transition at the flow level to the next execution
+element, and repeat step 3 with that element as the current element. +
++
+Note the same rules regarding transitioning within a flow during an
+original execution apply during restart processing as well.
+..  If the current execution element is a split, proceed in parallel for
+each flow in the split. For each flow, repeat step 3 with the flow
+element as the current element. When all flows in the split have been
+processed, follow the split's transition to the next execution element
+and repeat step 3 with that element as the current element.
+
+==== PartitionMapper on Restart
+
+When the PartitionMapper is invoked at the beginning of a step which has
+been executed within a previous job execution, the first and most
+important decision for the mapper implementor to make is whether or not
+to keep the previous partitions or to begin the new execution with new
+partition definitions.
+
+This decision is communicated to the batch implementation via the
+'partitionsOverride' property of the PartitionPlan built by the mapper,
+i.e. the result of PartitionPlan's getPartitionsOverride() method.
+
+This property directs whether or not the partitions used in the previous
+execution of this step will or will be used (i.e. the relevant data
+carried forward and applied) within the current execution of this step.
+(As a consequence, the value of this property has no real meaning when
+the mapper is first called on the first execution of this step).
+
+===== partitionsOverride = False
+
+Three rules apply in the case where override is set to 'false':
+
+====== Number of Partitions Must Be Same
+
+The key idea here is that the mapper must build a partition plan with
+the same number of partitions that were used in the previous execution
+of this step. As a consequence, it is an error for the partition plan to
+return (via getPartitions()) a different number than the number of
+partitions established by the plan the last time this step was executed.
+
+====== Partition Properties Populated From Current Plan
+
+Though the number of partitions in the previous plan is persisted, the
+Properties[] returned by the previous PartitionPlan's
+getPartitionProperties() is not. On a new execution of this step, it is
+the current return value of PartitionPlan#getPartitionProperties() which
+is used to populate the pool of potential 'partitionPlan' substitutions
+(see section 8.8.1.4).
+
+====== "Numbering" of Partitions via Partition Properties
+
+Upon execution of this step, the batch implementation will associate
+each element of the Properties[] returned by
+PartitionPlan#getPartitionProperties() with a single partition, in order
+to potentially resolve 'partitionPlan' substitutions (see section
+8.8.1.4) for a single partition. During the course of execution of each
+partition, the batch implementation will capture data such as checkpoint
+values, persistent user data, etc.
+
+Upon a new execution of this step during restart, the batch
+implementation must ensure that a similar mapping occurs. That is, the
+elements of the new Properties[] returned by the
+PartitionPlan#getPartitionProperties() built by the mapper must be
+mapped to the partitions in the same order as the earlier elements of
+the earlier Properties[] were mapped (for resolving 'partitionPlan'
+substitutions).
+
+E.g., the following must hold:
+
+Earlier Execution:
+----
+partitionPlanProps[] = mapper.getPartitionPlan().getPartitionProperties();
+
+partitionPlanProps[0] ---maps to---> partition leaving off at checkpoints R0, W0
+
+partitionPlanProps[1] ---maps to---> partition leaving off at checkpoints R1, W1
+----
+Current Execution:
+----
+newPartitionPlanProps[] = mapper.getPartitionPlan().getPartitionProperties();
+
+newPartitionPlanProps[0] ---maps to---> partition resuming at checkpoints R0, W0
+
+newPartitionPlanProps [1] ---maps to---> partition resuming at checkpoints R1, W1
+----
+In the shorthand above, "maps to" simply means that the Properties
+object on the left is used to potentially resolve the 'partitionPlan'
+substitutions for the give partition, before it executes as described.
+
+===== partitionsOverride = True
+
+In this case, all partition execution data: checkpoints, persistent user
+data, etc. from the earlier execution are discarded, and the new
+PartitionPlan built by the new execution of the PartitionMapper may
+define either the same or a different number of partitions; the new P
+artitionPlan's getPartitionProperties() return value will be used to
+resolve 'partitionPlan' substitutions.
+
+=== Supporting Classes
+
+==== JobContext
+[[app-listing.JobContext.java]]
+[source,java]
+.JobContext.java
+----
+package javax.batch.runtime.context;
+/**
+*
+* A JobContext provides information about the current
+* job execution.
+*
+*/
+import java.util.Properties;
+import javax.batch.runtime.BatchStatus;
+public interface JobContext
+{
+    /**
+    * Get job name
+    * *@return* value of 'id' attribute from <job>
+    */
+    public String getJobName();
+    /**
+    * The getTransientUserData method returns a transient data object
+    * belonging to the current Job XML execution element.
+    * *@return* user-specified type
+    */
+    public Object getTransientUserData();
+    /**
+    * The setTransientUserData method stores a transient data object into
+    * the current batch context.
+    * @param data is the user-specified type
+    */
+    public void setTransientUserData(Object data);
+    /**
+    * The getInstanceId method returns the current job's instance
+    * id.
+    * *@return* job instance id
+    */
+    public *long* getInstanceId();
+    /**
+    * The getExecutionId method returns the current job's current
+    * execution id.
+    * *@return* job execution id
+    */
+    public *long* getExecutionId();
+    /**
+    * The getProperties method returns the job level properties
+    * specified in a job definition.
+    * <p>
+    * A couple notes:
+    * <ul>
+    * <li> There is no guarantee that the same Properties object instance
+    * is always returned in the same (job) scope.
+    * <li> Besides the properties which are defined in JSL within a child
+    * &lt;
+    properties&gt;
+    element of a &lt;
+    job&gt;
+    element, the batch
+    * runtime implementation may choose to include additional,
+    * implementation-defined properties.
+    * </ul>
+    *
+    * *@return* job level properties
+    */
+    public Properties getProperties();
+    /**
+    * The getBatchStatus method simply returns the batch status value * set
+    by the batch runtime into the job context.
+    * *@return* batch status string
+    */
+    public BatchStatus getBatchStatus();
+    /**
+    * The getExitStatus method simply returns the exit status value stored
+    * into the job context through the setExitStatus method or null.
+    * *@return* exit status string
+    */
+    public String getExitStatus();
+    /**
+    * The setExitStatus method assigns the user-specified exit status for
+    * the current job. When the job ends, the exit status of the job is
+    * the value specified through setExitStatus. If setExitStatus was not
+    * called or was called with a null value, then the exit status
+    * defaults to the batch status of the job.
+    * @param status string
+    */
+    public void setExitStatus(String status);
+}
+----
+
+==== StepContext
+[[app-listing.StepContext.java]]
+[source,java]
+.StepContext.java
+----
+package javax.batch.runtime.context;
+import java.io.Serializable;
+import java.util.Properties;
+import javax.batch.runtime.BatchStatus;
+import javax.batch.runtime.Metric;
+/**
+*
+* A StepContext provides information about the current step
+* of a job execution.
+*
+*/
+public interface StepContext
+{
+    /**
+    * Get step name
+    * *@return* value of 'id' attribute from <step>
+    *
+    */
+    public String getStepName();
+    /**
+    * The getTransientUserData method returns a transient data object
+    * belonging to the current Job XML execution element.
+    * *@return* user-specified type
+    */
+    public Object getTransientUserData();
+    /**
+    * The setTransientUserData method stores a transient data object into
+    * the current batch context.
+    * @param data is the user-specified type
+    */
+    public void setTransientUserData(Object data);
+    /**
+    * The getStepExecutionId method returns the current step's
+    * execution id.
+    * *@return* step execution id
+    */
+    public *long* getStepExecutionId();
+    /**
+    * The getProperties method returns the step
+    level properties
+    * specified in a job definition.
+    * <p>
+    * A couple notes:
+    * <ul>
+    * <li> There is no guarantee that the same Properties object instance
+    * is always returned in the same (step) scope.
+    * <li> Besides the properties which are defined in JSL within a child
+    * &lt;
+    properties&gt;
+    element of a &lt;
+    step&gt;
+    element, the batch
+    * runtime implementation may choose to include additional,
+    * implementation-defined properties.
+    * </ul>
+    * *@return* step level properties
+    */
+    public Properties getProperties();
+    /**
+    * The getPersistentUserData method returns a persistent data object
+    * belonging to the current step. The user data type must implement
+    * java.util.Serializable. This data is saved as part of a step's
+    * checkpoint. For a step that does not do checkpoints, it is saved
+    * after the step ends. It is available upon restart.
+    * *@return* user-specified type
+    */
+    public Serializable getPersistentUserData();
+    /**
+    * The setPersistentUserData method stores a persistent data object
+    * into the current step. The user data type must implement
+    * java.util.Serializable. This data is saved as part of a step's
+    * checkpoint. For a step that does not do checkpoints, it is saved
+    * after the step ends. It is available upon restart.
+    * @param data is the user-specified type
+    */
+    public void setPersistentUserData(Serializable data);
+    /**
+    * The getBatchStatus method returns the current batch status of the
+    * current step. This value is set by the batch runtime and changes as
+    * the batch status changes.
+    * *@return* batch status string
+    */
+    public BatchStatus getBatchStatus();
+    /**
+    * The getExitStatus method simply returns the exit status value stored
+    * into the step context through the setExitStatus method or null.
+    * *@return* exit status string
+    */
+    public String getExitStatus();
+    /**
+    * The setExitStatus method assigns the user-specified exit status for
+    * the current step. When the step ends, the exit status of the step is
+    * the value specified through setExitStatus. If setExitStatus was not
+    * called or was called with a null value, then the exit status
+    * defaults to the batch status of the step.
+    * @param status string
+    */
+    public void setExitStatus(String status);
+    /**
+    * The getException method returns the last exception thrown from a
+    * step level batch artifact to the batch runtime.
+    * *@return* the last exception
+    */
+    public Exception getException();
+    /**
+    * The getMetrics method returns an array of step level metrics. These
+    * are things like commits, skips, etc.
+    * *@see* javax.batch.runtime.metric.Metric for definition of standard
+    * metrics.
+    * *@return* metrics array
+    */
+    public Metric[] getMetrics();
+}
+----
+
+==== Metric
+
+[[app-listing.Metric.Java]]
+[source,java]
+.Metric.java
+----
+package javax.batch.runtime;
+/**
+*
+* The Metric interface defines job metrics recorded by
+* the batch runtime.
+*
+*/
+public interface Metric
+{
+    public *enum* MetricType
+    {
+        READ_COUNT_, _WRITE_COUNT_,
+        _COMMIT_COUNT_,
+        _ROLLBACK_COUNT_, _READ_SKIP_COUNT_, _PROCESS_SKIP_COUNT_,
+        _FILTER_COUNT_,
+        _WRITE_SKIPCOUNT
+    }
+    /**
+    * The getName method returns the metric type.
+    * *@return* metric type.
+    */
+    public MetricType getType();
+    /**
+    * The getValue method returns the metric value.
+    * *@return* metric value.
+    */
+    public *long* getValue();
+}
+----
+
+
+==== PartitionPlan
+[[app-listing.PartitionPlan.java]]
+[source,java]
+.PartitionPlan.java
+----
+package javax.batch.api.partition;
+/**
+*
+* PartitionPlan is a helper class that carries partition processing
+* information set by the *@PartitionMapper* method.
+*
+* A PartitionPlan contains:
+* <ol>
+* <li>number of partition instances </li>
+* <li>number of threads on which to execute the partitions</li>
+* <li>substitution properties for each Partition (which can be
+* referenced using the <b><i>#
+{
+    partitionPlan['propertyName']
+}
+</i></b>
+* syntax. </li>
+* </ol>
+*/
+import java.util.Properties;
+public interface PartitionPlan
+{
+    /**
+    * Set number of partitions.
+    * @param count specifies the partition count
+    */
+    public void setPartitions(int count);
+    /**
+    * Specify whether or not to override the partition
+    * count from the previous job execution. This applies
+    * only to step restart .
+    * <p>
+    * When false is specified, the
+    * partition count from the previous job execution is used
+    * and any new value set for partition count in the current run
+    * is ignored. In addition, partition results from the previous
+    * job execution are remembered, and only incomplete partitions
+    * are reprocessed.
+    * <p>
+    * When true is specified, the partition count from the current run
+    * is used and all results from past partitions are discarded. Any
+    * resource cleanup or back out of work done in the previous run is the
+    * responsibility of the application. The PartitionReducer artifact's
+    * rollbackPartitionedStep method is invoked during restart before any
+    * partitions begin processing to provide a cleanup hook.
+    */
+    public void setPartitionsOverride(boolean override);
+    /**
+    * Return current value of partition override setting.
+    * *@return* override setting.
+    */
+    public boolean getPartitionsOverride();
+    /**
+    * Set maximum number of threads requested to use to run
+    * partitions for this step. A value of '0' requests the batch
+    * implementation to use the partition count as the thread
+    * count. Note the batch runtime is not required to use
+    * this full number of threads;
+    it may not have this many
+    * available, and may use less.
+    *
+    * @param count specifies the requested thread count
+    */
+    public void setThreads(int count);
+    /**
+    * Sets array of substitution Properties objects for the set of
+    Partitions.
+    * @param props specifies the Properties object array
+    * @see PartitionPlan#getPartitionProperties()
+    */
+    public void setPartitionProperties(Properties[] props);
+    /**
+    * Gets count of Partitions.
+    * *@return* Partition count
+    */
+    public int getPartitions();
+    /**
+    * Gets maximum number of threads requested to use to run
+    * partitions for this step. A value of '0' requests the batch
+    * implementation to use the partition count as the thread
+    * count. Note the batch runtime is not required to use
+    * this full number of threads;
+    it may not have this many
+    * available, and may use less.
+    *
+    * *@return* requested thread count
+    */
+    public int getThreads();
+    /**
+    * Gets array of Partition Properties objects for Partitions.
+    * <p>
+    * These can be used in Job XML substitution using
+    * substitution expressions with the syntax:
+    * <b><i>#
+    {
+        partitionPlan['propertyName']
+    }
+    </i></b>
+    * <p>
+    * Each element of the Properties array returned can
+    * be used to resolving substitutions for a single partition.
+    * In the typical use case, each Properties element will
+    * have a similar set of property names, with a
+    * substitution potentially resolving to the corresponding
+    * value for each partition.
+    *
+    * *@return* Partition Properties object array
+    */
+    public Properties[]
+    getPartitionProperties();
+}
+----
+
+
+
+[[app-listing.PartitionPlanImpl.java]]
+[source,java]
+.PartitionPlanImpl.java
+----
+package javax.batch.api.partition;
+import java.util.Properties;
+/**
+* The PartitionPlanImpl class provides a basic implementation
+* of the PartitionPlan interface.
+*/
+public class PartitionPlanImpl implements PartitionPlan
+{
+    *private* int partitions= 0;
+    *private* boolean override= *false*;
+    *private* int threads= 0;
+    Properties[] partitionProperties= null;
+    @Override
+    public void setPartitions(int count)
+    {
+        partitions= count;
+        // default thread count to partition count
+        *if* (threads == 0) threads= count;
+    }
+    @Override
+    public void setThreads(int count)
+    {
+        threads= count;
+    }
+    @Override
+    public void setPartitionsOverride(boolean override)
+    {
+        *this*.override= override;
+    }
+    @Override
+    public boolean getPartitionsOverride()
+    {
+        return override;
+    }
+    @Override
+    public void setPartitionProperties(Properties[] props)
+    {
+        partitionProperties= props;
+    }
+    @Override
+    public int getPartitions()
+    {
+        return partitions;
+    }
+    @Override
+    public int getThreads()
+    {
+        return threads;
+    }
+    @Override
+    public Properties[] getPartitionProperties()
+    {
+        return partitionProperties;
+    }
+}
+----
+
+==== BatchRuntime
+
+[[app-listing.BatchRuntime.java]]
+[source,java]
+.BatchRuntime.java
+----
+package javax.batch.runtime;
+/**
+* The BatchRuntime represents the batch
+* runtime environment.
+*
+*/
+import javax.batch.operations.JobOperator;
+/**
+* BatchRuntime represents the JSR 352 Batch Runtime.
+* It provides factory access to the JobOperator interface.
+*
+*/
+public class BatchRuntime
+{
+    /**
+    * The getJobOperator factory method returns
+    * an instance of the JobOperator interface.
+    * *@return* JobOperator instance.
+    */
+    public *static* JobOperator getJobOperator()
+    {
+        return null;
+    }
+}
+----
+
+
+==== BatchStatus
+[[app-listing.BatchStatus.java]]
+[source,java]
+.BatchStatus.java
+----
+package javax.batch.runtime;
+
+/**
+* BatchStatus enum defines the batch status values
+* possible for a job.
+*
+*/
+public enum BatchStatus
+{
+    STARTING_, _STARTED_, _STOPPING_,
+    _STOPPED_, _FAILED_, _COMPLETED_, _ABANDONED_
+}
+----
+
+==== JobOperator
+[[app-listing.JobOperator.java]]
+[source,java]
+.JobOperator.java
+----
+package javax.batch.operations;
+import java.util.List;
+import java.util.Set;
+import java.util.Properties;
+import javax.batch.runtime.JobExecution;
+import javax.batch.runtime.JobInstance;
+import javax.batch.runtime.StepExecution;
+/**
+* JobOperator provide the interface for operating on batch jobs.
+* Through the JobOperator a program can start, stop, and restart jobs.
+* It can additionally inspect job history, to discover what jobs
+* are currently running and what jobs have previously run.
+*
+* The JobOperator interface imposes no security constraints. However,
+* the implementer is free to limit JobOperator methods with a security
+* scheme of its choice. The implementer should terminate any method
+* that is limited by the security scheme with a JobSecurityException.
+*
+*/
+public interface JobOperator
+{
+    /**
+    * Returns a set of all job names known to the batch runtime.
+    *
+    * *@return* a set of job names.
+    * @throws JobSecurityException
+    */
+    public Set<String> getJobNames() throws JobSecurityException;
+    /**
+    * Returns number of instances of a job with a particular name.
+    *
+    * @param jobName
+    * specifies the name of the job.
+    * *@return* count of instances of the named job.
+    * @throws NoSuchJobException
+    * @throws JobSecurityException
+    */
+    public int getJobInstanceCount(String jobName) throws
+    NoSuchJobException,
+    JobSecurityException;
+    /**
+    * Returns all JobInstances belonging to a job with a particular name
+    * in reverse chronological order.
+    *
+    * @param jobName
+    * specifies the job name.
+    * @param start
+    * specifies the relative starting number (zero based) to
+    * return from the
+    * maximal list of job instances.
+    * @param count
+    * specifies the number of job instances to return from the
+    * starting position of the maximal list of job instances.
+    * *@return* list of JobInstances.
+    * @throws NoSuchJobException
+    * @throws JobSecurityException
+    */
+    public List<JobInstance> getJobInstances(String jobName, int start,
+    int count)throws NoSuchJobException, JobSecurityException;
+    /**
+    * Returns execution ids for job instances with the specified
+    * name that have running executions.
+    *
+    * @param jobName
+    * specifies the job name.
+    * *@return* a list of execution ids.
+    * @throws NoSuchJobException
+    * @throws JobSecurityException
+    */
+    public List<Long> getRunningExecutions(String jobName) throws
+    NoSuchJobException, JobSecurityException;
+    /**
+    * Returns job parameters for a specified job instance. These are the
+    * key/value pairs specified when the instance was originally created
+    * by the start method.
+    *
+    * @param executionId
+    * specifies the execution from which to retrieve the
+    * parameters.
+    * *@return* a Properties object containing the key/value job parameter
+    * pairs.
+    * @throws NoSuchJobExecutionException
+    * @throws JobSecurityException
+    */
+    public Properties getParameters(*long* executionId)
+    throws NoSuchJobExecutionException, JobSecurityException;
+    /**
+    * Creates a new job instance and starts the first execution of that
+    * instance, which executes asynchronously.
+    *
+    * Note the Job XML describing the job is first searched for by name
+    * according to a means prescribed by the batch runtime implementation.
+    * This may vary by implementation. If the Job XML is not found by that
+    * means, then the batch runtime must search for the specified Job XML
+    * as a resource from the `META-INF/batch-jobs` directory based on the
+    * current class loader. Job XML files under `META-INF/batch-jobs`
+    * directory follow a naming convention of "name".xml where "name" is
+    * the value of the jobXMLName parameter (see below).
+    *
+    * @param jobXMLName
+    * specifies the name of the Job XML describing the job.
+    * @param jobParameters
+    * specifies the keyword/value pairs for attribute
+    * substitution in the Job XML.
+    * *@return* executionId for the job execution.
+    * @throws JobStartException
+    * @throws JobSecurityException
+    */
+    public *long* start(String jobXMLName, Properties jobParameters)
+    throws
+    JobStartException, JobSecurityException;
+    /**
+    * Restarts a failed or stopped job instance, which executes
+    * asynchronously.
+    *
+    * @param executionId
+    * specifies the execution to to restart. This execution
+    * must be the most recent execution that ran.
+    * @param restartParameters
+    * specifies the keyword/value pairs for attribute
+    * substitution in the Job XML.
+    * *@return* new executionId
+    * @throws JobExecutionAlreadyCompleteException
+    * @throws NoSuchJobExecutionException
+    * @throws JobExecutionNotMostRecentException,
+    * @throws JobRestartException
+    * @throws JobSecurityException
+    */
+    public *long* restart(*long* executionId, Properties
+    restartParameters)
+    throws JobExecutionAlreadyCompleteException,
+    NoSuchJobExecutionException,
+    JobExecutionNotMostRecentException,
+    JobRestartException,
+    JobSecurityException;
+    /**
+    * Request a running job execution stops. This
+    * method notifies the job execution to stop
+    * and then returns. The job execution normally
+    * stops and does so asynchronously. Note
+    * JobOperator cannot guarantee the jobs stops:
+    * it is possible a badly behaved batch application
+    * does not relinquish control.
+    * <p>
+    * Note for partitioned batchlet steps the Batchlet
+    * stop method is invoked on each thread actively
+    * processing a partition.
+    *
+    * @param executionId
+    * specifies the job execution to stop.
+    * The job execution must be running.
+    * @throws NoSuchJobExecutionException
+    * @throws JobExecutionNotRunningException
+    * @throws JobSecurityException
+    */
+    public void stop(*long* executionId) throws
+    NoSuchJobExecutionException,
+    JobExecutionNotRunningException, JobSecurityException;
+    /**
+    * Set batch status to ABANDONED. The instance must have
+    * no running execution.
+    * <p>
+    * Note that ABANDONED executions cannot be restarted.
+    *
+    * @param executionId
+    * specifies the job execution to abandon.
+    * @throws NoSuchJobExecutionException
+    * @throws JobExecutionIsRunningException
+    * @throws JobSecurityException
+    */
+    public void abandon(*long* executionId) throws
+    NoSuchJobExecutionException,
+    JobExecutionIsRunningException, JobSecurityException;
+    /**
+    * Return the job instance for the specified execution id.
+    *
+    * @param executionId
+    * specifies the job execution.
+    * *@return* job instance
+    * @throws NoSuchJobExecutionException
+    * @throws JobSecurityException
+    */
+    public JobInstance getJobInstance(*long* executionId) throws
+    NoSuchJobExecutionException, JobSecurityException;
+    /**
+    * Return all job executions belonging to the specified job instance.
+    *
+    * @param jobInstance
+    * specifies the job instance.
+    * *@return* list of job executions
+    * @throws NoSuchJobInstanceException
+    * @throws JobSecurityException
+    */
+    public List<JobExecution> getJobExecutions(JobInstance instance)
+    throws
+    NoSuchJobInstanceException, JobSecurityException;
+    /**
+    * Return job execution for specified execution id
+    *
+    * @param executionId
+    * specifies the job execution.
+    * *@return* job execution
+    * @throws NoSuchJobExecutionException
+    * @throws JobSecurityException
+    */
+    public JobExecution getJobExecution(*long* executionId) throws
+    NoSuchJobExecutionException, JobSecurityException;
+    /**
+    * Return StepExecutions for specified execution id.
+    *
+    * @param executionId
+    * specifies the job execution.
+    * *@return* step executions (order not guaranteed)
+    * @throws NoSuchJobExecutionException
+    * @throws JobSecurityException
+    */
+    public List<StepExecution> getStepExecutions(*long* jobExecutionId)
+    throws NoSuchJobExecutionException, JobSecurityException;
+}
+----
+
+==== JobInstance
+[[app-listing.JobInstance.java]]
+[source,java]
+.JobInstance.java
+----
+package javax.batch.runtime;
+public interface JobInstance
+{
+    /**
+    * Get unique id for this JobInstance.
+    * *@return* instance id
+    */
+    public *long* getInstanceId();
+    /**
+    * Get job name.
+    * *@return* value of 'id' attribute from <job>
+    */
+    public String getJobName();
+}
+----
+
+==== JobExecution
+
+[[app-listing.JobExecution.java]]
+[source,java]
+.JobExecution.java
+----
+package javax.batch.runtime;
+import java.util.Date;
+import java.util.Properties;
+public interface JobExecution
+{
+    /**
+    * Get unique id for this JobExecution.
+    * *@return* execution id
+    */
+    public *long* getExecutionId();
+    /**
+    * Get job name.
+    * *@return* value of 'id' attribute from <job>
+    */
+    public String getJobName();
+    /**
+    * Get batch status of this execution.
+    * *@return* batch status value.
+    */
+    public BatchStatus getBatchStatus();
+    /**
+    * Get time execution entered STARTED status.
+    * *@return* date (time)
+    */
+    public Date getStartTime();
+    /**
+    * Get time execution entered end status: COMPLETED, STOPPED, FAILED
+    * *@return* date (time)
+    */
+    public Date getEndTime();
+    /**
+    * Get execution exit status.
+    * *@return* exit status.
+    */
+    public String getExitStatus();
+    /**
+    * Get time execution was created.
+    * *@return* date (time)
+    */
+    public Date getCreateTime();
+    /**
+    * Get time execution was last updated.
+    * *@return* date (time)
+    */
+    public Date getLastUpdatedTime();
+    /**
+    * Get job parameters for this execution.
+    * *@return* job parameters
+    */
+    public Properties getJobParameters();
+}
+----
+
+==== StepExecution
+
+[[app-listing.StepExecution.java]]
+[source,java]
+.StepExecution.java
+----
+package javax.batch.runtime;
+import java.util.Date;
+import java.io.Serializable;
+public interface StepExecution
+{
+    /**
+    * Get unique id for this StepExecution.
+    * *@return* StepExecution id
+    */
+    public *long* getStepExecutionId();
+    /**
+    * Get step name.
+    * *@return* value of 'id' attribute from <step>
+    */
+    public String getStepName();
+    /**
+    * Get batch status of this step execution.
+    * *@return* batch status.
+    */
+    public BatchStatus getBatchStatus();
+    /**
+    * Get time this step started.
+    * *@return* date (time)
+    */
+    public Date getStartTime();
+    /**
+    * Get time this step ended.
+    * *@return* date (time)
+    */
+    public Date getEndTime();
+    /**
+    * Get exit status of step.
+    * *@return* exit status
+    */
+    public String getExitStatus();
+    /**
+    * Get persistent user data.
+    * <p>
+    * For a partitioned step, this returns
+    * the persistent user data of the
+    * <code>StepContext</code> of the "top-level"
+    * or main thread (the one the <code>PartitionAnalyzer</code>, etc.
+    * execute on). It does not return the persistent user
+    * data of the partition threads.
+    * *@return* persistent data
+    */
+    public Serializable
+    getPersistentUserData ();
+    /**
+    * Get step metrics
+    * *@return* array of metrics
+    */
+    public Metric[] getMetrics();
+}
+----
+
+==== Batch Exception Classes
+
+This specification defines batch exception classes in package
+javax.batch.operations. Note all batch exceptions are direct subclasses
+of base class BatchRuntimeException, which itself is a direct subclass
+of java.lang.RuntimeException. The following batch exception classes are
+defined:
+
+1.  JobExecutionAlreadyCompleteException
+
+2.  JobExecutionIsRunningException
+
+3.  JobExecutionNotMostRecentException
+
+4.  JobExecutionNotRunningException
+
+5.  JobRestartException
+
+6.  JobSecurityException
+
+7.  JobStartException
+
+8.  NoSuchJobException
+
+9.  NoSuchJobExecutionException
+
+10. NoSuchJobInstanceException

@@ -1,0 +1,1773 @@
+== Batch Programming Model
+
+The batch programming model is described by interfaces, abstract
+classes, and field annotations. Interfaces define the essential contract
+between batch applications and the batch runtime. Most interfaces have a
+corresponding abstract class that provides default implementations of
+certain methods for developer convenience.
+
+=== Steps
+
+A batch step is either chunk or batchlet.
+
+==== Chunk
+
+A chunk type step performs item-oriented processing using a
+reader-processor-writer batch pattern and does checkpointing.
+
+===== ItemReader Interface
+
+An ItemReader is used to read items for a chunk step. ItemReader is one
+of the three batch artifact types that comprise a chunk type step. The
+other two are ItemProcessor and ItemWriter.
+
+The ItemReader interface may be used to implement an ItemReader batch
+artifact:
+
+[[app-listing.ItemReader.java]]
+[source,java]
+.ItemReader.java
+----
+package javax.batch.api.chunk;
+
+import java.io.Serializable;
+
+/*
+ * ItemReader defines the batch artifact that reads
+ * items for chunk processing.
+ */
+public interface ItemReader {
+  /**
+   * The open method prepares the reader to read items
+   * The input parameter represents the last checkpoint
+   * for this reader in a given job instance. The
+   * checkpoint data is defined by this reader and is
+   * provided by the checkpointInfo method. The checkpoint
+   * data provides the reader whatever information it needs
+   * to resume reading items upon restart. A checkpoint value
+   * of null is passed upon initial start.
+   *
+   * @param checkpoint specifies the last checkpoint
+   * @throws Exception is thrown for any errors.
+   */
+  public void open(Serializable checkpoint) throws Exception;
+
+  /**
+   * The close method marks the end of use of the
+   * ItemReader. The reader is free to do any cleanup
+   * necessary.
+   * @throws Exception is thrown for any errors.
+   */
+  public void close() throws Exception;
+
+  /**
+   * The readItem method returns the next item
+   * for chunk processing.
+   * It returns null to in dicate no more items, which
+   * also means the current chunk will be committed and
+   * the step will end.
+   * *@return* next item or null
+   * @throws Exception is thrown for any errors.
+   */
+  public Object readItem() throws Exception;
+
+  /**
+   * The checkpointInfo method returns the current
+   * checkpoint data for this reader. It is
+   * called before a chunk checkpoint is committed.
+   * *@return* checkpoint data
+   * @throws Exception is thrown for any errors.
+   */
+  public Serializable checkpointInfo() throws Exception;
+}
+----
+
+[[app-listing.AbstractItemReader.java]]
+[source,java]
+.AbstractItemReader.java
+----
+package javax.batch.api.chunk;
+import java.io.Serializable;
+public abstract class AbstractItemReader implements ItemReader
+{
+    @Override
+    public void open(Serializable checkpoint)throws Exception {
+    }
+
+    @Override
+    public void close()throws Exception {
+    }
+
+    @Override
+    public abstract Object readItem() throws Exception;
+
+    @Override
+    public Serializable checkpointInfo() throws Exception {
+        return null;
+    }
+}
+----
+
+
+===== ItemProcessor Interface
+
+An ItemProcessor is used to process items for a chunk step.
+ItemProcessor is one of the three batch artifact types that comprise a
+chunk type step. An ItemProcessor is an optional artifact on a chunk
+type step. The other two are ItemReader and ItemWriter.
+
+The ItemProcessor interface may be used to implement an ItemProcessor
+batch artifact:
+
+[[app-listing.ItemProcessor.java]]
+[source,java]
+.ItemProcessor.java
+----
+package javax.batch.api.chunk;
+/**
+* ItemProcessor is used in chunk processing
+* to operate on an input item and produce
+* an output item.
+*
+*/
+public interface ItemProcessor {
+    /**
+    * The processItem method is part of a chunk
+    * step. It accepts an input item from an
+    * item reader and returns an item that gets
+    * passed onto the item writer. Returning null
+    * indicates that the item should not be continued
+    * to be processed. This effectively enables processItem
+    * to filter out unwanted input items.
+    * @param item specifies the input item to process.
+    * *@return* output item to write.
+    * @throws Exception thrown for any errors.
+    */
+    public Object processItem(Object item) throws Exception;
+}
+----
+
+===== ItemWriter Interface
+
+An ItemWriter is used to write a list of output items for a chunk step.
+ItemWriter is one of the three batch artifact types that comprise a
+chunk type step. The other two are ItemProcessor and ItemReader.
+
+The ItemWriter interface may be used to implement an ItemWriter batch
+artifact:
+
+[[app-listing.ItemWriter.java]]
+[source,java]
+.ItemWriter.java
+----
+package javax.batch.api.chunk;
+import java.io.Serializable;
+import java.util.List;
+/**
+*
+* ItemWriter defines the batch artifact that writes to a
+* list of items for chunk processing.
+*
+*/
+public interface ItemWriter {
+    /**
+    * The open method prepares the writer to write items.
+    *
+    * The input parameter represents the last checkpoint
+    * for this writer in a given job instance. The
+    * checkpoint data is defined by this writer and is
+    * provided by the checkpointInfo method. The checkpoint
+    * data provides the writer whatever information it needs
+    * to resume writing items upon restart. A checkpoint value
+    * of null is passed upon initial start.
+    *
+    * @param checkpoint specifies the last checkpoint
+    * @throws Exception is thrown for any errors.
+    */
+    public void open(Serializable checkpoint) throws Exception;
+    /**
+    * The close method marks the end of use of the
+    * ItemWriter. The writer is free to do any cleanup
+    * necessary.
+    * @throws Exception is thrown for any errors.
+    */
+    public void close() throws Exception;
+    /**
+    * The writeItems method writes a list of item
+    * for the current chunk.
+    * @param items specifies the list of items to write.
+    * This may be an empty list (e.g. if all the
+    * items have been filtered out by the
+    * ItemProcessor).
+    * @throws Exception is thrown for any
+    errors.
+    */
+    public void writeItems(List<Object> items) throws Exception;
+    /**
+    * The checkpointInfo method returns the current
+    * checkpoint data for this writer. It is
+    * called before a chunk checkpoint is committed.
+    * *@return* checkpoint data
+    * @throws Exception is thrown for any errors.
+    */
+    public Serializable checkpointInfo() throws Exception;
+}
+----
+
+[[app-listing.AbstractItemWriter.java]]
+[source,java]
+.AbstractItemWriter.java
+----
+package javax.batch.api.chunk;
+import java.io.Serializable;
+import java.util.List;
+/**
+* The AbstractItemWriter provides default implementations
+* of not commonly implemented methods.
+*/
+public abstract class AbstractItemWriter implements ItemWriter
+{
+    /**
+    * Override this method if the ItemWriter requires
+    * any open time processing.
+    * The default implementation does nothing.
+    *
+    * @param last checkpoint for this ItemReader
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void open(Serializable checkpoint) throws Exception {
+    }
+    /**
+    * Override this method if the ItemWriter requires
+    * any close time processing.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void close() throws Exception {
+    }
+    /**
+    * Implement write logic for the ItemWriter in this
+    * method.
+    *
+    * @param items specifies the list of items to write.
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public abstract void writeItems(List<Object> items) throws
+    Exception;
+    /**
+    * Override this method if the ItemWriter supports
+    * checkpoints.
+    * The default implementation returns null.
+    *
+    * *@return* checkpoint data
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public Serializable checkpointInfo() throws Exception {
+        return null;
+    }
+}
+----
+
+===== CheckpointAlgorithm Interface
+
+A CheckpointAlgorithm implements a custom checkpoint policy for a chunk
+step. The CheckpointAlgorithm interface may be used to implement an
+CheckpointAlgorithm batch artifact:
+
+[[app-listing.CheckpointAlgorithm.java]]
+[source,java]
+.CheckpointAlgorithm.java
+----
+package javax.batch.api.chunk;
+/**
+* CheckpointAlgorithm provides a custom checkpoint
+* policy for chunk steps.
+*
+*/
+public interface CheckpointAlgorithm {
+    /**
+    * The checkpointTimeout is invoked at the beginning of a new
+    * checkpoint interval for the purpose of establishing the checkpoint
+    * timeout.
+    * It is invoked before the next chunk transaction begins. This
+    * method returns an integer value, which is the timeout value
+    * (expressed in seconds) which will be used for the next chunk
+    * transaction.
+    * This method is useful to automate the setting of the
+    * checkpoint timeout based on factors known outside the job
+    * definition.
+    * A value of '0' signifies no maximum established by this
+    * CheckpointAlgorithm, i.e. the maximum permissible timeout allowed by
+    * the runtime environment.
+    * @return the timeout interval (expressed in seconds)
+    * to use for the next checkpoint interval
+    * @throws Exception thrown for any errors.
+    */
+    public int checkpointTimeout() throws Exception;
+    /**
+    * The beginCheckpoint method is invoked before the
+    * next checkpoint interval begins (before the next
+    * chunk transaction begins).
+    * @throws Exception thrown for any errors.
+    */
+    public void beginCheckpoint() throws Exception;
+    /**
+    * The isReadyToCheckpoint method is invoked by
+    * the batch runtime after each item is processed
+    * to determine if now is the time to checkpoint
+    * the current chunk.
+    * *@return* boolean indicating whether or not
+    * to checkpoint now.
+    * @throws Exception thrown for any errors.
+    */
+    public boolean isReadyToCheckpoint() throws Exception;
+    /**
+    * The endCheckpoint method is invoked after the
+    * last checkpoint is taken (after the chunk
+    * transaction is committed).
+    * @throws Exception thrown for any errors.
+    */
+    public void endCheckpoint() throws Exception;
+}
+----
+
+[[app-listing.AbstractCheckpointAlgorithm.java]]
+[source,java]
+.AbstractCheckpointAlgorithm.java
+----
+package javax.batch.api.chunk;
+/**
+* The AbstractCheckpointAlgorithm provides default
+* implementations of less commonly implemented
+* methods.
+*/
+public abstract class AbstractCheckpointAlgorithm implements
+CheckpointAlgorithm {
+    /**
+    * Override this method if the CheckpointAlgorithm
+    * establishes a checkpoint timeout.
+    * The default implementation returns 0, which means
+    * the maximum permissible timeout allowed by the
+    * runtime environment.
+    *
+    * @return the timeout interval (expressed in seconds)
+    * to use for the next checkpoint interval
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public int checkpointTimeout() throws Exception {
+        return 0;
+    }
+    /**
+    * Override this method for the CheckpointAlgorithm
+    * to do something before a checkpoint interval
+    * begins (before the next chunk transaction begins).
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void beginCheckpoint() throws Exception {
+    }
+    /**
+    * Implement logic in this method
+    * to decide if a checkpoint should be taken now.
+    *
+    * *@return* boolean indicating whether or not
+    * to checkpoint now.
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public abstract boolean isReadyToCheckpoint() throws Exception;
+    /**
+    * Override this method for the CheckpointAlgorithm
+    * to do something after a checkpoint is taken (after
+    * the chunk transaction is committed).
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void endCheckpoint() throws Exception {
+    }
+}
+----
+
+==== Batchlet Interface
+A Batchlet-type step implements a roll your own batch pattern. This
+batch pattern is invoked once, runs to completion, and returns an exit
+status.
+
+The Batchlet interface may be used to implement a Batchlet batch
+artifact:
+
+[[app-listing.Batchlet.java]]
+[source,java]
+.Batchlet.java
+----
+package javax.batch.api;
+/**
+*
+* A batchlet is type of batch step
+* that can be used for any type of
+* background processing that does not
+* explicitly call for a chunk oriented
+* approach.
+* <p>
+* A well-behaved batchlet responds
+* to stop requests by implementing
+* the stop method.
+*
+*/
+public interface Batchlet {
+    /**
+    * The process method does the work
+    * of the batchlet. If this method
+    * throws an exception, the batchlet
+    * step ends with a batch status of
+    * FAILED.
+    * *@return* exit status string
+    * @throws Exception if an error occurs.
+    */
+    public String process() throws Exception;
+    /**
+    * The stop method is invoked by the batch
+    * runtime as part of JobOperator.stop()
+    * method processing. This method is invoked
+    * on a thread other than the thread on which
+    * the batchlet process method is running.
+    *
+    * @throws Exception if an error occurs.
+    */
+    public void stop() throws Exception;
+}
+----
+
+[[app-listing.AbstractBatchlet.java]]
+[source,java]
+.AbstractBatchlet.java
+----
+package javax.batch.api;
+/**
+* The AbstractBatchlet provides default
+* implementations of less commonly implemented methods.
+*/
+public abstract class AbstractBatchlet implements Batchlet {
+    /**
+    * Implement process logic for the Batchlet in this
+    * method.
+    *
+    * *@return* exit status string
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public abstract String process() throws Exception;
+    /**
+    * Override this method if the Batchlet will
+    * end in response to the JobOperator.stop()
+    * operation.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void stop() throws Exception {
+    }
+}
+----
+
+TIP: A well designed batchlet stops gracefully when the JobOperator.stop operation is invoked.  
+See section xref:_stop_processing[11.13] for further information about stop processing.
+
+=== Listeners
+Use Listeners to interpose on batch execution.
+
+==== JobListener Interface
+A job listener receives control before and after a job execution runs,
+and also if an exception is thrown during job processing. The
+JobListener interface may be used to implement an JobListener batch
+artifact:
+
+[[app-listing.JobListener.java]]
+[source,java]
+.JobListener.java
+----
+package javax.batch.api.listener;
+/**
+* JobListener intercepts job execution.
+*
+*/
+public interface JobListener {
+    /**
+    * The beforeJob method receives control
+    * before the job execution begins.
+    * @throws Exception throw if an error occurs.
+    */
+    public void beforeJob() throws Exception;
+    /**
+    * The afterJob method receives control
+    * after the job execution ends.
+    * @throws Exception throw if an error occurs.
+    */
+    public void afterJob() throws Exception;
+}
+----
+
+[[app-listing.AbstractJobListener.java]]
+[source,java]
+.AbstractJobListener.java
+----
+package javax.batch.api.listener;
+/**
+* The AbstractJobListener provides default
+* implementations of less commonly implemented methods.
+*/
+public abstract class AbstractJobListener implements JobListener
+{
+    /**
+    * Override this method if the JobListener
+    * will do something before the job begins.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void beforeJob() throws Exception {
+    }
+    /**
+    * Override this method if the JobListener
+    * will do something after the job ends.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void afterJob() throws Exception {
+    }
+}
+----
+
+
+==== StepListener Interface
+A step listener can receive control before and after a step runs, and
+also if an exception is thrown during step processing. The StepListener
+interface may be used to implement an StepListener batch artifact:
+
+[[app-listing.StepListener.java]]
+[source,java]
+.StepListener.java
+----
+package javax.batch.api.listener;
+/**
+* StepListener intercepts step execution.
+*
+*/
+public interface StepListener {
+    /**
+    * The beforeStep method receives control
+    * before a step execution begins.
+    * @throws Exception throw if an error occurs.
+    */
+    public void beforeStep() throws Exception;
+    /**
+    * The afterStep method receives control
+    * after a step execution ends.
+    * @throws Exception throw if an error occurs.
+    */
+    public void afterStep() throws Exception;
+}
+----
+
+[[app-listing.AbstractStepListener.java]]
+[source,java]
+.AbstractStepListener.java
+----
+package javax.batch.api.listener;
+/**
+* The AbstractStepListener provides default
+* implementations of less commonly implemented methods.
+*/
+public abstract class AbstractStepListener implements
+StepListener {
+    /**
+    * Override this method if the StepListener
+    * will do something before the step begins.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void beforeStep() throws Exception {
+    }
+    /**
+    * Override this method if the StepListener
+    * will do something after the step ends.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void afterStep() throws Exception {
+    }
+}
+----
+
+
+==== ChunkListener Interface
+A chunk listener can receive control at the beginning and the end of
+chunk, and upon an exception thrown back to the runtime implementation.
+The ChunkListener interface may be used to implement a ChunkListener
+batch artifact:
+
+[[app-listing.ChunkListener.java]]
+[source,java]
+.ChunkListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* ChunkListener intercepts chunk processing.
+*
+*/
+public interface ChunkListener {
+    /**
+    * The beforeChunk method receives control
+    * before processing of the next
+    * chunk begins. This method is invoked
+    * in the same transaction as the chunk
+    * processing.
+    * @throws Exception throw if an error occurs.
+    */
+    public void beforeChunk() throws Exception;
+    /**
+    * The onError method receives control
+    * before the chunk transaction is rolled back.
+    * Note afterChunk is not invoked in this case.
+    * @param ex specifies the exception that
+    * caused the roll back.
+    * @throws Exception throw if an error occurs.
+    */
+    public void onError(Exception ex) throws Exception;
+    /**
+    * The afterChunk method receives control
+    * after processing of the current
+    * chunk ends. This method is invoked
+    * in the same transaction as the chunk
+    * processing.
+    * @throws Exception throw if an error occurs.
+    */
+    public void afterChunk() throws Exception;
+}
+----
+
+[[app-listing.AbstractChunkListener.java]]
+[source,java]
+.AbstractChunkListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* The AbstractChunkListener provides default
+* implementations of less commonly implemented methods.
+*/
+public abstract class AbstractChunkListener implements
+ChunkListener {
+    /**
+    * Override this method if the ChunkListener
+    * will do something before the chunk begins.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void beforeChunk() throws Exception {
+    }
+    /**
+    * Override this method if the ChunkListener will do
+    * something before the chunk transaction is rolled back.
+    * Note afterChunk is not invoked in this case.
+    * @param ex specifies the exception that
+    * caused the roll back.
+    * @throws Exception (or subclass) throw if an error occurs.
+    */
+    @Override
+    public void onError(Exception ex) throws Exception {
+    }
+    /**
+    * Override this method if the ChunkListener
+    * will do something after the chunk ends.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void afterChunk() throws Exception {
+    }
+}
+----
+
+
+==== ItemReadListener Interface
+An item read listener can receive control before and after an item is
+read by an item reader, and also if the reader throws an exception. The
+ItemReadListener interface may be used to implement an ItemReadListener
+batch artifact:
+
+[[app-listing.ItemReadListener.java]]
+[source,java]
+.ItemReadListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* ItemReadListener intercepts item reader
+* processing.
+*
+*/
+public interface ItemReadListener {
+    /**
+    * The beforeRead method receives control
+    * before an item reader is called to read the next item.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void beforeRead() throws Exception;
+    /**
+    * The afterRead method receives control after an item
+    * reader reads an item. The method receives the item read as
+    * an input.
+    * @param item specifies the item read by the item reader.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void afterRead(Object item) throws Exception;
+    /**
+    * The onReadError method receives control after an item reader
+    * throws an exception in the readItem method.
+    * This method receives the exception as an input.
+    * @param ex specifies the exception that occurred in the item reader.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onReadError(Exception ex) throws Exception;
+}
+----
+
+[[app-listing.AbstractItemReadListener.java]]
+[source,java]
+.AbstractItemReadListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* The AbstractItemReadListener provides default
+* implementations of less commonly implemented methods.
+*/
+public abstract class AbstractItemReadListener implements
+ItemReadListener {
+    /**
+    * Override this method if the ItemReadListener
+    * will do something before the item is read.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void beforeRead() throws Exception {
+    }
+    /**
+    * Override this method if the ItemReadListener
+    * will do something after the item is read.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void afterRead(Object item) throws Exception {
+    }
+    /**
+    * Override this method if the ItemReadListener
+    * will do something when the ItemReader readItem
+    * method throws an exception.
+    * The default implementation does nothing.
+    *
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void onReadError(Exception ex) throws Exception {
+    }
+}
+----
+
+
+
+==== ItemProcessListener Interface
+An item processor listener can receive control before and after an item
+is processed by an item processor, and also if the processor throws an
+exception. The ItemProcessListener interface may be used to implement an
+ItemProcessListener batch artifact:
+
+
+[[app-listing.ItemProcessListener.java]]
+[source,java]
+.ItemProcessListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* ItemProcessListener intercepts item processing.
+*
+*/
+public interface ItemProcessListener {
+    /**
+    * The beforeProcess method receives control before
+    * an item processor is called to process the next item.
+    * The method receives the item to be processed as an input.
+    * @param item specifies the item about to be processed.
+    * @throws Exception if an error occurs.
+    */
+    public void beforeProcess(Object item) throws Exception;
+    /**
+    * The afterProcess method receives control after an item
+    * processor processes an item. The method receives the item processed
+    * and the result item as an input.
+    * @param item specifies the item processed by the item processor.
+    * @param result specifies the item to pass to the item writer.
+    * @throws Exception if an error occurs.
+    */
+    public void afterProcess(Object item, Object result) throws
+    Exception;
+    /**
+    * The onProcessError method receives control after an
+    * item processor processItem throws an exception. The method
+    * receives the item sent to the item processor as input.
+    * @param item specifies the item the processor attempted to process.
+    * @param ex specifies the exception thrown by the item processor.
+    * @throws Exception if an error occurs
+    */
+    public void onProcessError(Object item, Exception ex) throws
+    Exception;
+}
+----
+
+[[app-listing.AbstractItemProcessListener.java]]
+[source,java]
+.AbstractItemProcessListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* The AbstractItemProcessListener provides default
+* implementations of less commonly implemented methods.
+*
+*/
+public abstract class AbstractItemProcessListener implements
+ItemProcessListener {
+    /**
+    * Override this method if the ItemProcessListener
+    * will do something before the item is processed.
+    * The default implementation does nothing.
+    *
+    * @param item specifies the item about to be processed.
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void beforeProcess(Object item) throws Exception {
+    }
+    /**
+    * Override this method if the ItemProcessListener
+    * will do something after the item is processed.
+    * The default implementation does nothing.
+    *
+    * @param item specifies the item about to be processed.
+    * @param result specifies the item to pass to the item writer.
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void afterProcess(Object item, Object result) throws
+    Exception {
+    }
+    /**
+    * Override this method if the ItemProcessListener
+    * will do something when the ItemProcessor processItem
+    * method throws an exception.
+    * The default implementation does nothing.
+    *
+    * @param item specifies the item about to be processed.
+    * @param ex specifies the exception thrown by the item processor.
+    * @throws Exception (or subclass) if an error occurs.
+    */
+    @Override
+    public void onProcessError(Object item, Exception ex) throws
+    Exception {
+    }
+}
+----
+
+
+
+
+==== ItemWriteListener Interface
+A item write listener can receive control before and after an item is
+written by an item writer, and also if the writer throws an exception.
+The ItemWriteListener interface may be used to implement an
+ItemWriteListener batch artifact:
+
+[[app-listing.ItemWriteListener.java]]
+[source,java]
+.ItemWriteListener.java
+----
+package javax.batch.api.chunk.listener;
+import java.util.List;
+/**
+* ItemWriteListener intercepts item writer
+* processing.
+*
+*/
+public interface ItemWriteListener {
+    /**
+    * The beforeWrite method receives control before
+    * an item writer is called to write its items. The
+    * method receives the list of items sent to the item
+    * writer as an input.
+    * @param items specifies the items about to be
+    * written.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void beforeWrite(List<Object> items) throws Exception;
+    /**
+    * The afterWrite method receives control after an
+    * item writer writes its items. The method receives the
+    * list of items sent to the item writer as an input.
+    * @param items specifies the items written by the item writer.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void afterWrite(List<Object> items) throws Exception;
+    /**
+    * The onWriteError method receives control after an
+    * item writer writeItems throws an exception. The method
+    * receives the list of items sent to the item writer as input.
+    * @param items specifies the items which the item writer
+    * attempted to write.
+    * @param ex specifies the exception thrown by the item
+    * writer.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onWriteError(List<Object> items, Exception ex) throws
+    Exception;
+}
+----
+
+==== Skip Listener Interfaces
+A skip listener can receive control when a skippable exception is
+thrown from an item reader, processor, or writer. Three interfaces are
+provided to implement these listeners:
+
+[[app-listing.SkipReadListener.java]]
+[source,java]
+.SkipReadListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* SkipReadListener intercepts skippable
+* itemReader exception handling.
+*/
+public interface SkipReadListener {
+    /**
+    * The onSkipReadItem method receives control
+    * when a skippable exception is thrown from an
+    * ItemReader readItem method. This method receives the
+    * exception as an input.
+    * @param ex specifies the exception thrown by the ItemReader.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onSkipReadItem(Exception ex) throws Exception;
+}
+----
+
+[[app-listing.SkipProcessListener.java]]
+[source,java]
+.SkipProcessListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* SkipProcessListener intercepts skippable
+* itemProcess exception handling.
+*/
+public interface SkipProcessListener {
+    /**
+    * The onSkipProcessItem method receives control when
+    * a skippable exception is thrown from an ItemProcess
+    * processItem method.
+    * This method receives the exception and the item to process
+    * as an input.
+    * @param item specifies the item passed to the ItemProcessor.
+    * @param ex specifies the exception thrown by the
+    * ItemProcessor.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onSkipProcessItem(Object item, Exception ex) throws
+    Exception;
+}
+----
+
+[[app-listing.SkipWriteListener.java]]
+[source,java]
+.SkipWriteListener.java
+----
+package javax.batch.api.chunk.listener;
+import java.util.List;
+/**
+* SkipWriteListener intercepts skippable
+* itemWriter exception handling.
+*/
+public interface SkipWriteListener {
+    /**
+    * The onSkipWriteItems method receives control when a
+    * skippable exception is thrown from an ItemWriter
+    * writeItems method. This
+    * method receives the exception and the items that were
+    * skipped as an input.
+    * @param items specifies the list of item passed to the
+    * item writer.
+    * @param ex specifies the exception thrown by the
+    * ItemWriter.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onSkipWriteItem(List<Object> items, Exception ex)
+    throws Exception;
+}
+----
+
+==== RetryListener Interface
+
+A retry listener can receive control when a retryable exception is
+thrown from an item reader, processor, or writer. Three interfaces are
+provided to implement these listeners:
+
+[[app-listing.RetryReadListener.java]]
+[source,java]
+.RetryReadListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* RetryReadListener intercepts retry processing for
+* an ItemReader.
+*/
+public interface RetryReadListener {
+    /**
+    * The onRetryReadException method receives control
+    * when a retryable exception is thrown from an ItemReader
+    * readItem method.
+    * This method receives the exception as input. This method
+    * receives control in the same checkpoint scope as the
+    * ItemReader. If this method throws a an exception, the job
+    * ends in the FAILED state.
+    * @param ex specifies the exception thrown by the item
+    * reader.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onRetryReadException(Exception ex) throws Exception;
+}
+----
+
+[[app-listing.RetryProcessListener.java]]
+[source,java]
+.RetryProcessListener.java
+----
+package javax.batch.api.chunk.listener;
+/**
+* RetryProcessListener intercepts retry processing for
+* an ItemProcessor.
+*
+*/
+public interface RetryProcessListener {
+    /**
+    * The onRetryProcessException method receives control
+    * when a retryable exception is thrown from an ItemProcessor
+    * processItem method. This method receives the exception and the item
+    * being processed as inputs. This method receives control in same
+    * checkpoint scope as the ItemProcessor. If this method
+    * throws a an exception, the job ends in the FAILED state.
+    * @param item specifies the item passed to the ItemProcessor.
+    * @param ex specifies the exception thrown by the ItemProcessor.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onRetryProcessException(Object item, Exception ex)
+    throws Exception;
+}
+----
+
+
+[[app-listing.RetryWriteListener.java]]
+[source,java]
+.RetryWriteListener.java
+----
+package javax.batch.api.chunk.listener;
+import java.util.List;
+/**
+* RetryWriteListener intercepts retry processing for
+* an ItemWriter.
+*
+*/
+public interface RetryWriteListener {
+    /**
+    * The onRetryWriteException method receives control when a
+    * retryable exception is thrown from an ItemWriter writeItems
+    * method. This method receives the exception and the list of items
+    * being written as inputs.
+    * This method receives control in same checkpoint scope as the
+    * ItemWriter. If this method throws a an exception, the job ends
+    * in the FAILED state.
+    * @param items specify the items passed to an item writer.
+    * @param ex specifies the exception thrown by an item
+    * writer.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void onRetryWriteException(List<Object> items, Exception ex)
+    throws Exception;
+}
+----
+
+=== Batch Properties
+
+Batch applications need a way to receive parameters when a job is
+initiated for execution. Properties can be defined by batch programming
+model artifacts, then have values passed to them when a job is
+initiated. Batch properties are string values.
+
+Note batch properties are visible only in the scope in which they are
+defined (see Section xref:_scope_of_property_definitions_for_batchproperty[9.3.2]). However batch properties values can be
+formed from other properties according to Job XML Substitution Rules.
+See section xref:_job_xml_substitution[8.8] for further information on substitution.
+
+==== @BatchProperty
+
+The @BatchProperty annotation identifies a class field injection as a
+batch property. A batch property has a name (name) and default value.
+The @BatchProperty may be used on a class field for any class identified
+as a batch programming model artifact -E.g. ItemReader, ItemProcessor,
+JobListener, etc..
+
+@BatchProperty must be used with the standard @Inject annotation
+(javax.inject.Inject). @BatchProperty is used to assign batch artifact
+property values from Job XML to the batch artifact itself.
+
+A field annotated with the @BatchProperty annotation must not be static
+and must not be final.
+
+Note: the batch runtime must ensure @Inject works with @BatchProperty,
+whether or not the execution environment includes an implementation of
+JSR 299 or 330. This means the batch properties may always be injected.
+Whether or not other injections are supported is dependent upon the
+batch runtime implementation.
+
+Syntax:
+
+[[app-listing.batchProperty]]
+[source,java]
+----
+ package: javax.batch.api
+
+ @Inject @BatchProperty(name="<property-name>") String <field-name>;
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|<property-name> |is the optional name of this batch property. The
+default is the Java field name.
+
+|<field-name> |is the field name of the batch property.
+|=======================================================================
+
+[[app-listing.BatchProperty.java]]
+[source,java]
+.BatchProperty.java
+----
+package javax.batch.api;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.enterprise.util.Nonbinding;
+import javax.inject.Qualifier;
+/**
+* Annotation used by batch artifacts to declare a
+* field which is injectable via a JSL-defined value
+* (possibly leveraging Job XML substitutions).
+*
+*/
+@Qualifier
+@Target({
+    ElementType._FIELD_, ElementType._METHOD_,
+    ElementType._PARAMETER_
+}
+)
+@Retention(RetentionPolicy._RUNTIME_)
+public @interface BatchProperty {
+    @Nonbinding
+    public String name() default "";
+}
+----
+
+The value of the annotated field is assigned by the batch runtime if a
+corresponding property element with a matching name is specified in the
+JSL in the scope that applies to the batch artifact in question. If the
+JSL property value resolves to the empty string (either explicitly set
+to the empty string literal or resolving to an empty string via property
+substitution – see section xref:_job_xml_substitution[8.8]), no assignment is made and the resulting
+value is undefined by the batch specification. The resulting value might
+simply be the Java default value, however using various dependency
+injection technologies may produce different results. The resultant
+behavior may be defined by the particular dependency injection
+technology used in the runtime environment and so is outside the scope
+of this specification.
+Example:
+
+[[app-listing.BatchPropertySample]]
+[source,java]
+----
+ import javax.inject.Inject;
+ import javax.batch.api.BatchProperty;
+ public class MyItemReaderImpl {
+
+@Inject @BatchProperty String fname;
+
+}
+----
+
+Behavior:
+
+When the batch runtime instantiates the batch artifact (item reader in
+this example), it assigns the
+
+value of the property with name equal to fname provided in the job XML
+to the corresponding @BatchProperty field named fname. If no value is
+defined in JSL, the Java default (null) is assigned or some other
+default is provided by a particular dependency injection technology.
+
+==== Scope of property definitions for @BatchProperty Injection
+
+The rules governing the definition of properties for injection via
+@BatchProperty deserve some extra explanation and an example.
+
+For a given artifact, the only properties that are injectable via
+@BatchProperty are those which are defined at the level of the artifact
+itself (i.e. as children of the "properties" element which is in turn a
+child of the very element defining the artifact: batchlet, reader,
+listener, etc.).
+
+In particular, just because an artifact definition is contained (at some
+level of nesting) within a job element and (for most artifacts) within a
+step element as well, it is NOT the case that the job properties and
+step properties are themselves injectable into that artifact via
+@BatchProperty. This is the case even though these job and step
+properties are available for resolving the artifact-level property
+definitions via the jobProperties substitution mechanism (see section
+8.8.1.2) .
+
+The following example should make this more clear:
+
+[[app-listing.BatchPropertyXML]]
+[source,xml]
+.Example JSL
+----
+<job>
+ <properties>
+ <property name="x" value="xVal"/>
+ ...
+ <step id="step1">
+  <batchlet ref="MyBatchlet">
+   <properties>
+    <property name="y" value="#\{jobProperties['x']}"/>
+   </properties>
+
+----
+
+*Example Java (MyBatchlet from JSL above):*
+
+[[app-listing.BadBatchProperty]]
+[source,java]
+----
+ // WONT WORK! - There is no property 'x' in scope for this injection
+ @Inject @BatchProperty(name="x");
+
+ // WILL WORK – Gets value 'xVal'
+ @Inject @BatchProperty(name="y");
+----
+
+=== Batch Contexts
+
+Context objects are supplied by the batch runtime and provide important
+functions to a batch application. Contexts provide information about the
+running batch job, provide a place for a batch job to store interim
+values, and provide a way for the batch application to communicate
+important information back to the batch runtime. Contexts can be
+injected into an application as member variables. There is a context for
+both job and step. The job context represents the entire job. The step
+context represents the current step executing within the job.
+
+==== Batch Contexts
+Batch artifact access to batch contexts is by injection using the
+standard @Inject annotation (javax.inject.Inject). A field into which a
+batch context is injected must not be static and must not be final.
+E.g.:
+
+ @Inject JobContext _jctxt;
+
+ @Inject StepContext _sctxt;
+
+The batch runtime is responsible to ensure the correct context object is
+injected according to the job or step currently executing.
+
+Note: the batch runtime must ensure @Inject works with JobContext and
+StepContext, whether or not the execution environment includes an
+implementation of JSR 299 or 330. This means the batch contexts may
+always be injected. Whether or not other injections are supported is
+dependent upon the batch runtime implementation.
+ See section 10.9.1 for definition of JobContext class. See section
+10.9.2 for definition of StepContext class.
+
+===== Batch Context Lifecycle and Scope
+
+A batch context has thread affinity and is visible only to the batch
+artifacts executing on that particular thread. A batch context injected
+field may be null when out of scope. Each context type has a distinct
+scope and lifecycle as follows:
+
+1.  JobContext +
++
+There is one JobContext per job execution. It exists for the life of a
+job. There is a distinct JobContext for each sub-thread of a parallel
+execution (e.g. partitioned step).
+
+2.  StepContext +
++
+There is one StepContext per step execution. It exists for the life of
+the step. For a partitioned step, there is one StepContext for the
+parent step/thread; there is a distinct StepContext for each sub-thread
+and each StepContext has its own distinct persistent user data for each
+sub-thread.
+
+=== Parallelization
+
+Batch jobs may be configured to run some of their steps in parallel.
+There are two supported parallelization models:
+
+. Partitioned:
++
+In the partitioned model, a step is configured to run as multiple
+instances across multiple threads. Each thread runs the same step or
+flow. This model is logically equivalent to launching multiple instances
+of the same step. It is intended that each partition processes a
+different range of the input items.
++
+The partitioned model includes several optional batch artifacts to
+enable finer control over parallel processing:
++
+.. PartitionMapper provides a programmatic means for calculating the
+number of partitions and unique properties for each.
+.. PartitionReducer provides a unit of work demarcation around
+partition processing.
+.. PartitionCollector provides a means for merging interrim results
+from individual partitions.
+.. PartitionAnalyzer provides a means to gather interrim and final
+results from individual partitions for single point of control
+processing and decision making.
+
+. Concurrent:
++
+In the concurrent model, the flows defined by a split are configured to
+run concurrently on multiple threads, one flow per thread.
+
+==== PartitionMapper Interface
+A partition mapper receives control at the start of a partitioned
+execution. The partition mapper is responsible to provide unique batch
+properties for each partition. The PartitionMapper interface may be used
+to implement a PartitionMapper batch artifact:
+
+[[app-listing.PartitionMapper.java]]
+[source,java]
+.PartitionMapper.java
+----
+package javax.batch.api.partition;
+import javax.batch.api.partition.PartitionPlan;
+/**
+* PartitionMapper receives control at the start of a partitioned
+* execution. A PartitionMapper is responsible to provide unique
+* batch properties for each partition.
+*
+*/
+public interface PartitionMapper {
+    /**
+    * The mapPartitions method that receives control at the
+    * start of partitioned step processing. The method
+    * returns a PartitionPlan, which specifies the batch properties
+    * for each partition.
+    * *@return* partition plan for a partitioned step.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public PartitionPlan mapPartitions( ) throws Exception;
+}
+----
+
+See section 10.9.4 for details on the PartitionPlan result value type.
+
+The PartitionMapper, when defined, is invoked upon every execution,
+including restarted executions. For a full discussion of the behavior on
+restart, including how to override particular details of the
+PartitionPlan built by the previous execution, see section xref:_batchruntime[10.8.5].
+
+==== PartitionReducer Interface
+
+A partition reducer provides a unit of work demarcation across
+partitions. It is not a JTA transaction; no resources are enlisted.
+Rather, it provides transactional flow semantics to facilitate
+finalizing merge or compensation logic. The PartitionReducer interface
+may be used to implement an PartitionReducer batch artifact:
+
+[[app-listing.PartitionReducer.java]]
+[source,java]
+.PartitionReducer.java
+----
+package javax.batch.api.partition;
+/**
+* PartitionReducer provides unit of work demarcation across
+* partitions. It is not a JTA transaction; no resources are
+* enlisted. Rather, it provides transactional flow semantics
+* to facilitate finalizing merge or compensation logic.
+*
+*/
+public interface PartitionReducer {
+    public *enum* PartitionStatus {
+        COMMIT_, _ROLLBACK
+    }
+    /**
+    * The beginPartitionedStep method receives
+    * control at the start of partition processing.
+    * It receives control before the PartitionMapper
+    * is invoked and before any partitions are started.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void beginPartitionedStep() throws Exception;
+    /**
+    * The beforePartitionedStepCompletion method
+    * receives control at the end of partitioned
+    * step processing. It receives control after all
+    * partitions have completed. It does not receive
+    * control if the PartitionReducer is rolling back.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void beforePartitionedStepCompletion() throws Exception;
+    /**
+    * The rollbackPartitionedStep method receives
+    * control if the runtime is rolling back a partitioned
+    * step. Any partition threads still running are
+    * allowed to complete before this method is invoked. This method
+    * receives control if any of the following conditions
+    * are true:
+    * <p>
+    * <ol>
+    * <li>One or more partitions end with a Batch Status of
+    * STOPPED or FAILED.</li>
+    * <li>Any of the following partitioned step callbacks
+    * throw an exception:</li>
+    * <ol>
+    * <li>PartitionMapper</li>
+    * <li>PartitionReducer</li>
+    * <li>PartitionCollector</li>
+    * <li>PartitionAnalyzer</li>
+    * </ol>
+    * <li>A job with partitioned steps is restarted.</li>
+    * </ol>
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void rollbackPartitionedStep() throws Exception;
+    /**
+    * The afterPartitionedStepCompletion method receives control
+    * at the end of a partition processing. It receives a status
+    * value that identifies the outcome of the partition processing.
+    * The status string value is either "COMMIT" or "ROLLBACK".
+    * @param status specifies the outcome of the partitioned step. Values
+    * are "COMMIT" or "ROLLBACK".
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void afterPartitionedStepCompletion(PartitionStatus status)
+    throws Exception;
+}
+----
+
+[[app-listing.AbstractPartitionReducer.java]]
+[source,java]
+.AbstractPartitionReducer.java
+----
+package javax.batch.api.partition;
+/**
+* The AbstractPartitionReducer provides default
+* implementations of less commonly implemented methods.
+*/
+public abstract class AbstractPartitionReducer implements
+PartitionReducer {
+    /**
+    * Override this method to take action before
+    * partitioned step processing begins.
+    *
+    * @throws Exception is thrown if an error occurs.
+    */
+    @Override
+    public void beginPartitionedStep() throws Exception {
+    }
+    /**
+    * Override this method to take action before
+    * normal partitioned step processing ends.
+    *
+    * @throws Exception is thrown if an error occurs.
+    */
+    @Override
+    public void beforePartitionedStepCompletion() throws Exception {
+    }
+    /**
+    * Override this method to take action when a
+    * partitioned step is rolling back.
+    *
+    * @throws Exception is thrown if an error occurs.
+    */
+    @Override
+    public void rollbackPartitionedStep() throws Exception {
+    }
+    /**
+    * Override this method to take action after
+    * partitioned step processing ends.
+    *
+    * @param status specifies the outcome of the partitioned step.
+    * Values are "COMMIT" or "ROLLBACK".
+    * @throws Exception is thrown if an error occurs.
+    */
+    @Override
+    public void afterPartitionedStepCompletion(PartitionStatus status)
+    throws Exception {
+    }
+}
+----
+
+==== PartitionCollector Interface
+
+A partition collector provides a way to send data from individual
+partitions to a single point of control running on the parent thread.
+The PartitionAnalyzer is used to receive and process this data. See
+section xref:_partitionanalyzer_interface[9.5.4] for further information about the PartitionAnalyzer. The
+PartitionCollector interface may be used to implement an
+PartitionCollector batch artifact:
+
+[[app-listing.PartitionCollector.java]]
+[source,java]
+.PartitionCollector.java
+----
+package javax.batch.api.partition;
+import java.io.Serializable;
+/**
+* PartitionCollector provides a way to pass data from
+* individual partitions to a single point of control running on
+* the step's parent thread. The PartitionAnalyzer is used to
+* receive and process this data.
+*
+*/
+public interface PartitionCollector {
+    /**
+    * The collectPartitionData method receives control
+    * periodically during partition processing.
+    * This method receives control on each thread processing
+    * a partition as follows:
+    * <p>
+    * <ol>
+    * <li>for a chunk type step, it receives control after
+    * every chunk checkpoint and then one last time at the
+    * end of the partition;
+    </li>
+    * <li>for a batchlet type step, it receives control once
+    * at the end of the batchlet.</li>
+    * </ol>
+    * <p>
+    * Note the collector is not called if the partition
+    * terminates due to an unhandled exception.
+    * <p>
+    * *@return* an Serializable object to pass to the
+    * PartitionAnalyzer.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public Serializable collectPartitionData() throws Exception;
+}
+----
+
+==== PartitionAnalyzer Interface
+
+A partition analyzer receives control to process data and final results
+from partitions. If a partition collector is configured on the step, the
+partition analyzer receives control to process the data and results from
+the partition collector. While a separate partition collector instance
+is invoked on each thread processing a partition, the partition analyzer
+runs on a single, consistent thread each time it is invoked. The
+PartitionAnalyzer interface may be used to implement an
+PartitionAnalyzer batch artifact:
+
+[[app-listing.PartitionAnalyzer.java]]
+[source,java]
+.PartitionAnalyzer.java
+----
+package javax.batch.api.partition;
+import java.io.Serializable;
+import javax.batch.runtime.BatchStatus;
+/**
+* PartitionAnalyzer receives control to process
+* data and final results from each partition. If
+* a PartitionCollector is configured on the step,
+* the PartitionAnalyzer receives control to process
+* the data and results from the partition collector.
+* While a separate PartitionCollector instance is
+* invoked on each thread processing a step partition,
+* a single PartitionAnalyzer instance runs on a single,
+* consistent thread each time it is invoked.
+*
+*/
+public interface PartitionAnalyzer {
+    /**
+    * The analyzeCollectorData method receives
+    * control each time a Partition collector sends
+    * its payload. It receives the
+    * Serializable object from the collector as an
+    * input.
+    * @param data specifies the payload sent by a
+    * PartitionCollector.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void analyzeCollectorData(Serializable data) throws
+    Exception;
+    /**
+    * The analyzeStatus method receives control each time a
+    * partition ends. It receives the batch and exit
+    * status strings of the partition as inputs.
+    * @param batchStatus specifies the batch status of a partition.
+    * @param exitStatus specifies the exit status of a partition.
+    * @throws Exception is thrown if an error occurs.
+    */
+    public void analyzeStatus(BatchStatus batchStatus, String
+    exitStatus) throws Exception;
+}
+----
+
+[[app-listing.AbstractPartitionAnalyzer.java]]
+[source,java]
+.AbstractPartitionAnalyzer.java
+----
+package javax.batch.api.partition;
+import java.io.Serializable;
+import javax.batch.runtime.BatchStatus;
+/**
+* The AbstractPartitionAnalyzer provides default
+* implementations of less commonly implemented methods.
+*/
+public abstract class AbstractPartitionAnalyzer implements
+PartitionAnalyzer {
+    /**
+    * Override this method to analyze PartitionCollector payloads.
+    *
+    * @param data specifies the payload sent by the
+    * PartitionCollector.
+    * @throws Exception is thrown if an error occurs.
+    */
+    @Override
+    public void analyzeCollectorData(Serializable data) throws
+    Exception {
+    }
+    /**
+    * Override this method to analyze partition end status.
+    * @param batchStatus specifies the batch status of a partition.
+    * @param exitStatus specifies the exit status of a partition.
+    * @throws Exception is thrown if an error occurs.
+    */
+    @Override
+    public void analyzeStatus(BatchStatus batchStatus, String
+    exitStatus)
+    throws Exception {
+    }
+}
+----
+
+
+=== Decider Interface
+
+A decider may be used to determine batch exit status and sequencing
+between steps, splits, and flows in a Job XML. The decider returns a
+String value which becomes the exit status value on which the decision
+chooses the next transition. The Decider interface may be used to
+implement an Decider batch artifact:
+
+[[app-listing.Decider.java]]
+[source,java]
+.Decider.java
+----
+package javax.batch.api;
+import javax.batch.runtime.StepExecution;
+/**
+* A Decider receives control as part of a decision element
+* in a job. It is used to direct execution flow during job
+* processing. It returns an exit status that updates the
+* current job execution's exit status. This exit status
+* value also directs the execution transition based on
+* next, end, stop, fail child elements configured on the
+* same decision element as the decider.
+*/
+public interface Decider {
+    /**
+    * The decide method sets a new exit status for a job.
+    * It receives an array of StepExecution objects as input.
+    * These StepExecution objects represent the execution
+    * element that transitions to this decider as follows:
+    * <p>
+    * <ul>
+    * <li>Step</li>
+    * <p>
+    * When the transition is from a step, the decide method
+    * receives the StepExecution corresponding
+    * to the step as input.
+    * <li>Split</li>
+    * <p>
+    * When the transition is from a split, the decide method
+    * receives a StepExecution from each flow defined to the split
+    * as input.
+    * <li>Flow</li>
+    * <p>
+    * When the transition is from a flow, the decide method
+    * receives a StepExecution corresponding
+    * to the last execution element that completed in the flow.
+    * This will be a single StepExecution if the last element
+    * was a step and multiple StepExecutions if the last element
+    * was a split.
+    * </ul>
+    * @param executions specifies the StepExecution(s) of the preceding
+    * element.
+    * *@return* updated job exit status
+    * @throws Exception is thrown if an error occurs.
+    */
+    public String decide(StepExecution[] executions) throws Exception;
+}
+----
+
+
+=== Transactionality
+
+Chunk type check points are transactional. The batch runtime uses global
+transaction mode on the Java EE platform and local transaction mode on
+the Java SE platform. Global transaction timeout is configurable at
+step-level with a step-level property:
+
+'javax.transaction.global.timeout={seconds} - default is 180
+seconds'
+
+Example:
+[source,xml]
+----
+ <step id="MyGlobalStep">
+  <properties>
+   <property name="javax.transaction.global.timeout" value="600"/>
+  </properties>
+ </step>
+----

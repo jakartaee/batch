@@ -1,0 +1,13 @@
+== Acknowledgements
+A number of individuals deserve special recognition for their contributions to forming this specification:
+
+* Kevin Conner
+* Tim Fanelli
+* Cheng Fang
+* Mahesh Kannan
+* Scott Kurz
+* Wayne Lund
+* Simon Martinelli
+* Michael Minella
+* Kaushik Mukherjee
+* Joe Pullen
