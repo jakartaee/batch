@@ -28,7 +28,7 @@ artifact:
 [source,java]
 .ItemReader.java
 ----
-package javax.batch.api.chunk;
+package jakarta.batch.api.chunk;
 
 import java.io.Serializable;
 
@@ -86,7 +86,7 @@ public interface ItemReader {
 [source,java]
 .AbstractItemReader.java
 ----
-package javax.batch.api.chunk;
+package jakarta.batch.api.chunk;
 import java.io.Serializable;
 public abstract class AbstractItemReader implements ItemReader
 {
@@ -123,7 +123,7 @@ batch artifact:
 [source,java]
 .ItemProcessor.java
 ----
-package javax.batch.api.chunk;
+package jakarta.batch.api.chunk;
 /**
 * ItemProcessor is used in chunk processing
 * to operate on an input item and produce
@@ -160,7 +160,7 @@ artifact:
 [source,java]
 .ItemWriter.java
 ----
-package javax.batch.api.chunk;
+package jakarta.batch.api.chunk;
 import java.io.Serializable;
 import java.util.List;
 /**
@@ -218,7 +218,7 @@ public interface ItemWriter {
 [source,java]
 .AbstractItemWriter.java
 ----
-package javax.batch.api.chunk;
+package jakarta.batch.api.chunk;
 import java.io.Serializable;
 import java.util.List;
 /**
@@ -283,7 +283,7 @@ CheckpointAlgorithm batch artifact:
 [source,java]
 .CheckpointAlgorithm.java
 ----
-package javax.batch.api.chunk;
+package jakarta.batch.api.chunk;
 /**
 * CheckpointAlgorithm provides a custom checkpoint
 * policy for chunk steps.
@@ -340,7 +340,7 @@ public interface CheckpointAlgorithm {
 [source,java]
 .AbstractCheckpointAlgorithm.java
 ----
-package javax.batch.api.chunk;
+package jakarta.batch.api.chunk;
 /**
 * The AbstractCheckpointAlgorithm provides default
 * implementations of less commonly implemented
@@ -410,7 +410,7 @@ artifact:
 [source,java]
 .Batchlet.java
 ----
-package javax.batch.api;
+package jakarta.batch.api;
 /**
 *
 * A batchlet is type of batch step
@@ -452,7 +452,7 @@ public interface Batchlet {
 [source,java]
 .AbstractBatchlet.java
 ----
-package javax.batch.api;
+package jakarta.batch.api;
 /**
 * The AbstractBatchlet provides default
 * implementations of less commonly implemented methods.
@@ -497,7 +497,7 @@ artifact:
 [source,java]
 .JobListener.java
 ----
-package javax.batch.api.listener;
+package jakarta.batch.api.listener;
 /**
 * JobListener intercepts job execution.
 *
@@ -522,7 +522,7 @@ public interface JobListener {
 [source,java]
 .AbstractJobListener.java
 ----
-package javax.batch.api.listener;
+package jakarta.batch.api.listener;
 /**
 * The AbstractJobListener provides default
 * implementations of less commonly implemented methods.
@@ -562,7 +562,7 @@ interface may be used to implement an StepListener batch artifact:
 [source,java]
 .StepListener.java
 ----
-package javax.batch.api.listener;
+package jakarta.batch.api.listener;
 /**
 * StepListener intercepts step execution.
 *
@@ -587,7 +587,7 @@ public interface StepListener {
 [source,java]
 .AbstractStepListener.java
 ----
-package javax.batch.api.listener;
+package jakarta.batch.api.listener;
 /**
 * The AbstractStepListener provides default
 * implementations of less commonly implemented methods.
@@ -628,7 +628,7 @@ batch artifact:
 [source,java]
 .ChunkListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * ChunkListener intercepts chunk processing.
 *
@@ -668,7 +668,7 @@ public interface ChunkListener {
 [source,java]
 .AbstractChunkListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * The AbstractChunkListener provides default
 * implementations of less commonly implemented methods.
@@ -720,7 +720,7 @@ batch artifact:
 [source,java]
 .ItemReadListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * ItemReadListener intercepts item reader
 * processing.
@@ -756,7 +756,7 @@ public interface ItemReadListener {
 [source,java]
 .AbstractItemReadListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * The AbstractItemReadListener provides default
 * implementations of less commonly implemented methods.
@@ -810,7 +810,7 @@ ItemProcessListener batch artifact:
 [source,java]
 .ItemProcessListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * ItemProcessListener intercepts item processing.
 *
@@ -851,7 +851,7 @@ public interface ItemProcessListener {
 [source,java]
 .AbstractItemProcessListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * The AbstractItemProcessListener provides default
 * implementations of less commonly implemented methods.
@@ -913,7 +913,7 @@ ItemWriteListener batch artifact:
 [source,java]
 .ItemWriteListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 import java.util.List;
 /**
 * ItemWriteListener intercepts item writer
@@ -963,7 +963,7 @@ provided to implement these listeners:
 [source,java]
 .SkipReadListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * SkipReadListener intercepts skippable
 * itemReader exception handling.
@@ -985,7 +985,7 @@ public interface SkipReadListener {
 [source,java]
 .SkipProcessListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * SkipProcessListener intercepts skippable
 * itemProcess exception handling.
@@ -1011,7 +1011,7 @@ public interface SkipProcessListener {
 [source,java]
 .SkipWriteListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 import java.util.List;
 /**
 * SkipWriteListener intercepts skippable
@@ -1045,7 +1045,7 @@ provided to implement these listeners:
 [source,java]
 .RetryReadListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * RetryReadListener intercepts retry processing for
 * an ItemReader.
@@ -1071,7 +1071,7 @@ public interface RetryReadListener {
 [source,java]
 .RetryProcessListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 /**
 * RetryProcessListener intercepts retry processing for
 * an ItemProcessor.
@@ -1099,7 +1099,7 @@ public interface RetryProcessListener {
 [source,java]
 .RetryWriteListener.java
 ----
-package javax.batch.api.chunk.listener;
+package jakarta.batch.api.chunk.listener;
 import java.util.List;
 /**
 * RetryWriteListener intercepts retry processing for
@@ -1146,7 +1146,7 @@ as a batch programming model artifact -E.g. ItemReader, ItemProcessor,
 JobListener, etc..
 
 @BatchProperty must be used with the standard @Inject annotation
-(javax.inject.Inject). @BatchProperty is used to assign batch artifact
+(jakarta.inject.Inject). @BatchProperty is used to assign batch artifact
 property values from Job XML to the batch artifact itself.
 
 A field annotated with the @BatchProperty annotation must not be static
@@ -1163,7 +1163,7 @@ Syntax:
 [[app-listing.batchProperty]]
 [source,java]
 ----
- package: javax.batch.api
+ package: jakarta.batch.api
 
  @Inject @BatchProperty(name="<property-name>") String <field-name>;
 ----
@@ -1182,13 +1182,13 @@ default is the Java field name.
 [source,java]
 .BatchProperty.java
 ----
-package javax.batch.api;
+package jakarta.batch.api;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Qualifier;
+import jakarta.enterprise.util.Nonbinding;
+import jakarta.inject.Qualifier;
 /**
 * Annotation used by batch artifacts to declare a
 * field which is injectable via a JSL-defined value
@@ -1225,8 +1225,8 @@ Example:
 [[app-listing.BatchPropertySample]]
 [source,java]
 ----
- import javax.inject.Inject;
- import javax.batch.api.BatchProperty;
+ import jakarta.inject.Inject;
+ import jakarta.batch.api.BatchProperty;
  public class MyItemReaderImpl {
 
 @Inject @BatchProperty String fname;
@@ -1307,7 +1307,7 @@ context represents the current step executing within the job.
 
 ==== Batch Contexts
 Batch artifact access to batch contexts is by injection using the
-standard @Inject annotation (javax.inject.Inject). A field into which a
+standard @Inject annotation (jakarta.inject.Inject). A field into which a
 batch context is injected must not be static and must not be final.
 E.g.:
 
@@ -1388,8 +1388,8 @@ to implement a PartitionMapper batch artifact:
 [source,java]
 .PartitionMapper.java
 ----
-package javax.batch.api.partition;
-import javax.batch.api.partition.PartitionPlan;
+package jakarta.batch.api.partition;
+import jakarta.batch.api.partition.PartitionPlan;
 /**
 * PartitionMapper receives control at the start of a partitioned
 * execution. A PartitionMapper is responsible to provide unique
@@ -1428,7 +1428,7 @@ may be used to implement an PartitionReducer batch artifact:
 [source,java]
 .PartitionReducer.java
 ----
-package javax.batch.api.partition;
+package jakarta.batch.api.partition;
 /**
 * PartitionReducer provides unit of work demarcation across
 * partitions. It is not a JTA transaction; no resources are
@@ -1499,7 +1499,7 @@ public interface PartitionReducer {
 [source,java]
 .AbstractPartitionReducer.java
 ----
-package javax.batch.api.partition;
+package jakarta.batch.api.partition;
 /**
 * The AbstractPartitionReducer provides default
 * implementations of less commonly implemented methods.
@@ -1561,7 +1561,7 @@ PartitionCollector batch artifact:
 [source,java]
 .PartitionCollector.java
 ----
-package javax.batch.api.partition;
+package jakarta.batch.api.partition;
 import java.io.Serializable;
 /**
 * PartitionCollector provides a way to pass data from
@@ -1612,9 +1612,9 @@ PartitionAnalyzer batch artifact:
 [source,java]
 .PartitionAnalyzer.java
 ----
-package javax.batch.api.partition;
+package jakarta.batch.api.partition;
 import java.io.Serializable;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 /**
 * PartitionAnalyzer receives control to process
 * data and final results from each partition. If
@@ -1657,9 +1657,9 @@ public interface PartitionAnalyzer {
 [source,java]
 .AbstractPartitionAnalyzer.java
 ----
-package javax.batch.api.partition;
+package jakarta.batch.api.partition;
 import java.io.Serializable;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 /**
 * The AbstractPartitionAnalyzer provides default
 * implementations of less commonly implemented methods.
@@ -1704,8 +1704,8 @@ implement an Decider batch artifact:
 [source,java]
 .Decider.java
 ----
-package javax.batch.api;
-import javax.batch.runtime.StepExecution;
+package jakarta.batch.api;
+import jakarta.batch.runtime.StepExecution;
 /**
 * A Decider receives control as part of a decision element
 * in a job. It is used to direct execution flow during job
@@ -1759,7 +1759,7 @@ transaction mode on the Java EE platform and local transaction mode on
 the Java SE platform. Global transaction timeout is configurable at
 step-level with a step-level property:
 
-'javax.transaction.global.timeout={seconds} - default is 180
+'jakarta.transaction.global.timeout={seconds} - default is 180
 seconds'
 
 Example:
@@ -1767,7 +1767,7 @@ Example:
 ----
  <step id="MyGlobalStep">
   <properties>
-   <property name="javax.transaction.global.timeout" value="600"/>
+   <property name="jakarta.transaction.global.timeout" value="600"/>
   </properties>
  </step>
 ----
