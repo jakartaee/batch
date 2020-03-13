@@ -20,11 +20,27 @@
 package jakarta.batch.api.chunk;
 
 /**
- * The AbstractItemWriter provides default implementations
- * of not commonly implemented methods.
+ * ItemProcessor is used in chunk processing
+ * to operate on an input item and produce
+ * an output item.
  *
- * @deprecated use {@link TypedItemWriter}.
+ * @param <I> input item type.
+ * @param <O> returned item type.
  */
-@Deprecated
-public abstract class AbstractItemWriter implements ItemWriter {
+public interface TypedItemProcessor<I, O> {
+
+	/**
+	 * The processItem method is part of a chunk
+	 * step. It accepts an input item from an
+	 * item reader and returns an item that gets
+	 * passed onto the item writer. Returning null
+     * indicates that the item should not be continued
+     * to be processed.  This effectively enables processItem
+     * to filter out unwanted input items.
+	 * @param item specifies the input item to process.
+	 * @return output item to write.
+	 * @throws Exception thrown for any errors.
+	 */
+	public O processItem(I item) throws Exception;
+
 }

@@ -18,12 +18,27 @@
  */
 
 package jakarta.batch.api.chunk.listener;
+import java.util.List;
+
 /**
- * SkipProcessListener intercepts skippable 
- * itemProcess exception handling.
+ * RetryWriteListener intercepts retry processing for
+ * an ItemWriter. 
  *
- * @deprecated Use {@link TypedSkipProcessListener}.
+ * @param <I> items type.
  */
-@Deprecated
-public interface SkipProcessListener extends TypedSkipProcessListener<Object> {
+public interface TypedRetryWriteListener<I> {
+	/**
+	 * The onRetryWriteException method receives control when a 
+	 * retryable exception is thrown from an ItemWriter writeItems
+	 * method. This method receives the exception and the list of items 
+	 * being written as inputs.  
+	 * This method receives control in same checkpoint scope as the 
+	 * ItemWriter. If this method throws a an exception, the job ends 
+	 * in the FAILED state. 
+	 * @param items specify the items passed to an item writer.
+	 * @param ex specifies the exception thrown by an item
+	 * writer.
+	 * @throws Exception is thrown if an error occurs.
+	 */
+	void onRetryWriteException(List<I> items, Exception ex) throws Exception;
 }
