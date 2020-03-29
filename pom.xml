@@ -123,7 +123,7 @@
 
         <!-- Building the project -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.java>1.6</version.java>
+        <version.java>1.8</version.java>
 
         <!-- Dependencies -->
         <version.jakarta.enterprise.jakarta.enterprise.cdi-api>3.0.0-M1</version.jakarta.enterprise.jakarta.enterprise.cdi-api>
