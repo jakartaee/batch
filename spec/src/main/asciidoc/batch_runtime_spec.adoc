@@ -1,7 +1,7 @@
 == Batch Runtime Specification
 
 === Batch Properties Reserved Namespace
-The batch runtime supports properties at job, step, partition, and artifact level. The property name prefix, 'javax.batch', is reserved for
+The batch runtime supports properties at job, step, partition, and artifact level. The property name prefix, 'jakarta.batch', is reserved for
 use by the batch runtime, as prescribed by this specification and future
 revisions of same. Applications and specification implementations must
 not define properties for their own use that begin with this prefix.
@@ -380,7 +380,7 @@ resolve 'partitionPlan' substitutions.
 [source,java]
 .JobContext.java
 ----
-package javax.batch.runtime.context;
+package jakarta.batch.runtime.context;
 /**
 *
 * A JobContext provides information about the current
@@ -388,7 +388,7 @@ package javax.batch.runtime.context;
 *
 */
 import java.util.Properties;
-import javax.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.BatchStatus;
 public interface JobContext
 {
     /**
@@ -470,11 +470,11 @@ public interface JobContext
 [source,java]
 .StepContext.java
 ----
-package javax.batch.runtime.context;
+package jakarta.batch.runtime.context;
 import java.io.Serializable;
 import java.util.Properties;
-import javax.batch.runtime.BatchStatus;
-import javax.batch.runtime.Metric;
+import jakarta.batch.runtime.BatchStatus;
+import jakarta.batch.runtime.Metric;
 /**
 *
 * A StepContext provides information about the current step
@@ -577,7 +577,7 @@ public interface StepContext
     /**
     * The getMetrics method returns an array of step level metrics. These
     * are things like commits, skips, etc.
-    * *@see* javax.batch.runtime.metric.Metric for definition of standard
+    * *@see* jakarta.batch.runtime.metric.Metric for definition of standard
     * metrics.
     * *@return* metrics array
     */
@@ -591,7 +591,7 @@ public interface StepContext
 [source,java]
 .Metric.java
 ----
-package javax.batch.runtime;
+package jakarta.batch.runtime;
 /**
 *
 * The Metric interface defines job metrics recorded by
@@ -627,7 +627,7 @@ public interface Metric
 [source,java]
 .PartitionPlan.java
 ----
-package javax.batch.api.partition;
+package jakarta.batch.api.partition;
 /**
 *
 * PartitionPlan is a helper class that carries partition processing
@@ -746,7 +746,7 @@ public interface PartitionPlan
 [source,java]
 .PartitionPlanImpl.java
 ----
-package javax.batch.api.partition;
+package jakarta.batch.api.partition;
 import java.util.Properties;
 /**
 * The PartitionPlanImpl class provides a basic implementation
@@ -809,13 +809,13 @@ public class PartitionPlanImpl implements PartitionPlan
 [source,java]
 .BatchRuntime.java
 ----
-package javax.batch.runtime;
+package jakarta.batch.runtime;
 /**
 * The BatchRuntime represents the batch
 * runtime environment.
 *
 */
-import javax.batch.operations.JobOperator;
+import jakarta.batch.operations.JobOperator;
 /**
 * BatchRuntime represents the JSR 352 Batch Runtime.
 * It provides factory access to the JobOperator interface.
@@ -841,7 +841,7 @@ public class BatchRuntime
 [source,java]
 .BatchStatus.java
 ----
-package javax.batch.runtime;
+package jakarta.batch.runtime;
 
 /**
 * BatchStatus enum defines the batch status values
@@ -860,13 +860,13 @@ public enum BatchStatus
 [source,java]
 .JobOperator.java
 ----
-package javax.batch.operations;
+package jakarta.batch.operations;
 import java.util.List;
 import java.util.Set;
 import java.util.Properties;
-import javax.batch.runtime.JobExecution;
-import javax.batch.runtime.JobInstance;
-import javax.batch.runtime.StepExecution;
+import jakarta.batch.runtime.JobExecution;
+import jakarta.batch.runtime.JobInstance;
+import jakarta.batch.runtime.StepExecution;
 /**
 * JobOperator provide the interface for operating on batch jobs.
 * Through the JobOperator a program can start, stop, and restart jobs.
@@ -1086,7 +1086,7 @@ public interface JobOperator
 [source,java]
 .JobInstance.java
 ----
-package javax.batch.runtime;
+package jakarta.batch.runtime;
 public interface JobInstance
 {
     /**
@@ -1108,7 +1108,7 @@ public interface JobInstance
 [source,java]
 .JobExecution.java
 ----
-package javax.batch.runtime;
+package jakarta.batch.runtime;
 import java.util.Date;
 import java.util.Properties;
 public interface JobExecution
@@ -1167,7 +1167,7 @@ public interface JobExecution
 [source,java]
 .StepExecution.java
 ----
-package javax.batch.runtime;
+package jakarta.batch.runtime;
 import java.util.Date;
 import java.io.Serializable;
 public interface StepExecution
@@ -1226,7 +1226,7 @@ public interface StepExecution
 ==== Batch Exception Classes
 
 This specification defines batch exception classes in package
-javax.batch.operations. Note all batch exceptions are direct subclasses
+jakarta.batch.operations. Note all batch exceptions are direct subclasses
 of base class BatchRuntimeException, which itself is a direct subclass
 of java.lang.RuntimeException. The following batch exception classes are
 defined:
