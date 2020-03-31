@@ -133,7 +133,7 @@ The format and content of the `batch.xml` file follows:
 
 [source,xml]
 ----
-<batch-artifacts xmlns="http://xmlns.jcp.org/xml/ns/javaee">
+<batch-artifacts xmlns="https://jakarta.ee/xml/ns/jakartaee/">
  <ref id="<reference-name>" class="<impl-class-name>" />
 </batch-artifacts>
 ----
