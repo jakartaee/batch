@@ -113,6 +113,7 @@
                     <docfilessubdirs>true</docfilessubdirs>
                     <doctitle>Jakarta Batch ${project.version} API</doctitle>
                     <windowtitle>Jakarta Batch ${project.version} API</windowtitle>
+                    <source>8</source>
                 </configuration>
                 <executions>
                     <execution>
