@@ -1,2 +1,2 @@
 == Applicability of Specification
-This specification applies to Java SE and Java EE environments. It requires Java 6 or higher.
+This specification applies to Java SE and Jakarta EE environments. It requires Java 8 or higher.

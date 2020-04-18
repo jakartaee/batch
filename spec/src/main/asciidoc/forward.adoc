@@ -1,2 +1,2 @@
 == Foreword
-This specification describes the job specification language, Java programming model, and runtime environment for batch applications for the Java platform. It is designed for use on both the Java SE and Java EE platforms. Additionally, it is designed to work with dependency injection (DI) containers without prescribing a particular DI implementation.
+This specification describes the job specification language, Java programming model, and runtime environment for batch applications for the Java platform. It is designed for use on both the Java SE and Jakarta EE platforms. Additionally, it is designed to work with dependency injection (DI) containers without prescribing a particular DI implementation.
