@@ -46,7 +46,7 @@
         <revisiondate>${maven.build.timestamp}</revisiondate>
 
         <!-- Assuming not necessarily identical to Maven project version -->
-        <spec.version>1.0</spec.version>
+        <spec.version>2.0</spec.version>
     </properties>
 
     <build>
