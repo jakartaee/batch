@@ -1754,13 +1754,19 @@ public interface Decider {
 
 === Transactionality
 
-Chunk type check points are transactional. The batch runtime uses global
-transaction mode on the Jakarta EE platform and local transaction mode on
-the Java SE platform. Global transaction timeout is configurable at
+Chunk type check points are transactional.  When running on a 
+Jakarta EE platform, the batch runtime uses global transactions.  
+In a Java SE or other environment, the batch runtime may use global 
+transactions if available, otherwise the transactional behavior 
+is undefined.  
+
+Global transaction timeout is configurable at
 step-level with a step-level property:
 
-'jakarta.transaction.global.timeout={seconds} - default is 180
-seconds'
+[width="100%",cols="<50%,<50%",]
+|============================================
+| jakarta.transaction.global.timeout | (seconds) - default is 180 (seconds)
+|============================================
 
 Example:
 [source,xml]
