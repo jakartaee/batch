@@ -1755,7 +1755,7 @@ public interface Decider {
 === Transactionality
 
 Chunk type check points are transactional. The batch runtime uses global
-transaction mode on the Java EE platform and local transaction mode on
+transaction mode on the Jakarta EE platform and local transaction mode on
 the Java SE platform. Global transaction timeout is configurable at
 step-level with a step-level property:
 
