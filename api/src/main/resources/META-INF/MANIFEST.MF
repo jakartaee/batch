@@ -3,11 +3,11 @@ Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.html
 Bundle-ManifestVersion: 2
 Bundle-Name: jakarta.batch-api
 Bundle-SymbolicName: jakarta.batch-api
-Bundle-Version: 2.0.0-RC1
-Implementation-Version: 2.0.0-RC1
+Bundle-Version: 2.0.0.M1
+Implementation-Version: 2.0.0.M1
 Specification-Title: Jakarta Batch
-Specification-Vendor: IBM
-Specification-Version: 1.0
+Specification-Vendor: Eclipse Foundation
+Specification-Version: 2.0
 Extension-Name: jakarta.batch
 Import-Package: jakarta.enterprise.util;resolution:=optional,
  jakarta.inject;resolution:=optional
