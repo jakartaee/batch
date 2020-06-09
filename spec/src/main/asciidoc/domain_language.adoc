@@ -1,8 +1,8 @@
 == Domain Language of Batch
 To any experienced batch architect, the overall concepts of batch
-processing used by JSR 352 should be familiar and comfortable. There are
+processing used by Jakarta Batch should be familiar and comfortable. There are
 "Jobs" and "Steps" and developer supplied processing units called
-ItemReaders and ItemWriters. However, because of the JSR 352 operations,
+ItemReaders and ItemWriters. However, because of the Jakarta Batch operations,
 callbacks, and idioms, there are opportunities for the following:
 
 [loweralpha]
@@ -19,7 +19,7 @@ This architecture framework is a blueprint that has been proven through
 decades of implementations on the last several generations of platforms
 (COBOL/Mainframe, C++/Unix, and now Java/anywhere). JCL and COBOL
 developers are likely to be as comfortable with the concepts as C++, C#
-and Java developers. JSR 352 specifies the layers, components and
+and Java developers. Jakarta Batch specifies the layers, components and
 technical services commonly found in robust, maintainable systems used
 to address the creation of simple to complex batch applications.
 
@@ -39,7 +39,7 @@ just the top of an overall hierarchy:
 image::image005.png[Job hierarchy diagram]
 
 
-With JSR 352, a Job is simply a container for Steps. It combines
+With Jakarta Batch, a Job is simply a container for Steps. It combines
 multiple steps that belong logically together in a flow and allows for
 configuration of properties global to all steps, such as restartability.
 The job configuration contains:
@@ -156,7 +156,7 @@ ItemProcessors.
 
 === Chunk-oriented Processing
 
-JSR 352 specifies a 'Chunk Oriented' processing style as its primary
+Jakarta Batch specifies a 'Chunk Oriented' processing style as its primary
 pattern. Chunk oriented processing refers to reading the data one item
 at a time, and creating 'chunks' that will be written out, within a
 transaction boundary. One item is read in from an ItemReader, handed to
@@ -177,7 +177,7 @@ consistency, following a planned or unplanned interruption.
 Checkpoints work naturally with chunk-oriented processing. The end of
 processing for each chunk is a natural point for taking a checkpoint.
 
-JSR 352 specifies runtime support for checkpoint/restart in a generic
+Jakarta Batch specifies runtime support for checkpoint/restart in a generic
 way that can be exploited by any chunk-oriented batch step that has this
 requirement.
 

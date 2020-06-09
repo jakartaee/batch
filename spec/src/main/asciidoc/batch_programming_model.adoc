@@ -1154,9 +1154,9 @@ and must not be final.
 
 Note: the batch runtime must ensure @Inject works with @BatchProperty,
 whether or not the execution environment includes an implementation of
-JSR 299 or 330. This means the batch properties may always be injected.
-Whether or not other injections are supported is dependent upon the
-batch runtime implementation.
+Jakarta Dependency Injection.   The batch properties must always be
+injected, and depending on the specific dependency injection technology
+used, other injections may or may not also be supported.
 
 Syntax:
 
@@ -1319,10 +1319,10 @@ The batch runtime is responsible to ensure the correct context object is
 injected according to the job or step currently executing.
 
 Note: the batch runtime must ensure @Inject works with JobContext and
-StepContext, whether or not the execution environment includes an
-implementation of JSR 299 or 330. This means the batch contexts may
-always be injected. Whether or not other injections are supported is
-dependent upon the batch runtime implementation.
+StepContext, whether or not the execution environment includes an implementation of
+Jakarta Dependency Injection.  The batch contexts must always be
+injected, and depending on the specific dependency injection technology
+used, other injections may or may not also be supported.
  See section 10.9.1 for definition of JobContext class. See section
 10.9.2 for definition of StepContext class.
 

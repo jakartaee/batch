@@ -1,6 +1,6 @@
 == Job Specification Language
 Job Specification Language (JSL) specifies a job, its steps, and
-directs their execution. The JSL for JSR 352 is implemented with XML and
+directs their execution. The JSL for Jakarta Batch is implemented with XML and
 will be henceforth referred to as "Job XML".
 
 === Job

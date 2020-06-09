@@ -817,7 +817,7 @@ package jakarta.batch.runtime;
 */
 import jakarta.batch.operations.JobOperator;
 /**
-* BatchRuntime represents the JSR 352 Batch Runtime.
+* BatchRuntime represents the Jakarta Batch Runtime.
 * It provides factory access to the JobOperator interface.
 *
 */
