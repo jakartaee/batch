@@ -23,7 +23,7 @@ and Java developers. JSR 352 specifies the layers, components and
 technical services commonly found in robust, maintainable systems used
 to address the creation of simple to complex batch applications.
 
-image::image003.png[image]
+image::image003.png[Batch runtime diagram]
 
 The diagram above highlights the key concepts that make up the domain
 language of batch. A Job has one to many steps, which has no more than
@@ -36,7 +36,8 @@ A Job is an entity that encapsulates an entire batch process. A Job
 will be wired together via a Job Specification Language. However, Job is
 just the top of an overall hierarchy:
 
-image::image005.png[http://static.springsource.org/spring-batch/trunk/reference/html-single/images/job-heirarchy.png]
+image::image005.png[Job hierarchy diagram]
+
 
 With JSR 352, a Job is simply a container for Steps. It combines
 multiple steps that belong logically together in a flow and allows for
@@ -104,7 +105,7 @@ rules that are applied as part of the processing. As with Job, a Step
 has an individual StepExecution that corresponds with a unique
 JobExecution:
 
-image::image007.png[http://static.springsource.org/spring-batch/trunk/reference/html-single/images/jobHeirarchyWithSteps.png]
+image::image007.png[Job Hierarchy With Steps Diagram]
 
 ==== StepExecution
 A StepExecution represents a single attempt to execute a Step. A new
@@ -163,7 +164,7 @@ an ItemProcessor, and aggregated. Once the number of items read equals
 the commit interval, the entire chunk is written out via the ItemWriter,
 and then the transaction is committed.
 
-image::image009.png[http://static.springsource.org/spring-batch/trunk/reference/html-single/images/chunk-oriented-processing.png]
+image::image009.png[Chunk sequence diagram]
 
 === Batch Checkpoints
 
