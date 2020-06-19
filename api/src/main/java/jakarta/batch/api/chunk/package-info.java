@@ -18,6 +18,6 @@
 */
 /**
  * Provides APIs used by artifacts in a Batch chunk step.
- * @version 1.0
+ * @version 2.0
  */
 package jakarta.batch.api.chunk;

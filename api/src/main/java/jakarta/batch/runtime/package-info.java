@@ -18,6 +18,6 @@
 */
 /**
  * Provides APIs for viewing the detailed outcomes and metrics of Batch job executions.
- * @version 1.0
+ * @version 2.0
  */
 package jakarta.batch.runtime;

@@ -18,6 +18,6 @@
 */
 /**
  * Provides APIs defining listener artifacts for a Batch chunk step.
- * @version 1.0
+ * @version 2.0
  */
 package jakarta.batch.api.chunk.listener;
