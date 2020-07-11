@@ -43,28 +43,34 @@ public class BatchRuntime {
 	* @return JobOperator instance.
 	*/
 	public static JobOperator getJobOperator() {
+		JobOperator operator = null;
+		if (System.getSecurityManager() == null) {
+			for (JobOperator provider : ServiceLoader.load(JobOperator.class)) {
+				if (logger.isLoggable(Level.FINE)) {
+					logger.fine("Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
+				}
+				operator = provider;
+				break;
+			}
+		} else {
+			operator = AccessController.doPrivileged(new PrivilegedAction<JobOperator>() {
+				public JobOperator run() {
 
+					ServiceLoader<JobOperator> loader = ServiceLoader.load(JobOperator.class);
+					JobOperator returnVal = null;
+					for (JobOperator provider : loader) {
+						if (logger.isLoggable(Level.FINE)) {
+							logger.fine("Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
+						}
+						// Use first one
+						returnVal = provider;
+						break;
+					}
 
-		JobOperator operator = AccessController.doPrivileged(new PrivilegedAction<JobOperator> () {
-            public JobOperator run() {
-
-            	ServiceLoader<JobOperator> loader = ServiceLoader.load(JobOperator.class);
-            	JobOperator returnVal = null;
-            	for (JobOperator provider : loader) {
-        			if (provider != null) {
-        				if (logger.isLoggable(Level.FINE)) {
-        					logger.fine("Loaded BatchContainerServiceProvider with className = " + provider.getClass().getCanonicalName());
-        				}
-        				// Use first one
-        				returnVal = provider;
-        				break;
-        			}
-        		}
-
-                return returnVal;
-            }
-        });
-
+					return returnVal;
+				}
+			});
+		}
 
 		if (operator == null) {
 			if (logger.isLoggable(Level.WARNING)) {
