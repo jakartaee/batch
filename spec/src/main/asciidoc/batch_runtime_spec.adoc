@@ -826,12 +826,9 @@ public class BatchRuntime
     /**
     * The getJobOperator factory method returns
     * an instance of the JobOperator interface.
-    * *@return* JobOperator instance.
+    * @return JobOperator instance.
     */
-    public *static* JobOperator getJobOperator()
-    {
-        return null;
-    }
+    public static JobOperator getJobOperator() { ... }
 }
 ----
 
