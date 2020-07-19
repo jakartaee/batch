@@ -393,13 +393,13 @@ public interface JobContext
 {
     /**
     * Get job name
-    * *@return* value of 'id' attribute from <job>
+    * @return value of 'id' attribute from <job>
     */
     public String getJobName();
     /**
     * The getTransientUserData method returns a transient data object
     * belonging to the current Job XML execution element.
-    * *@return* user-specified type
+    * @return user-specified type
     */
     public Object getTransientUserData();
     /**
@@ -411,15 +411,15 @@ public interface JobContext
     /**
     * The getInstanceId method returns the current job's instance
     * id.
-    * *@return* job instance id
+    * @return job instance id
     */
-    public *long* getInstanceId();
+    public long getInstanceId();
     /**
     * The getExecutionId method returns the current job's current
     * execution id.
-    * *@return* job execution id
+    * @return job execution id
     */
-    public *long* getExecutionId();
+    public long getExecutionId();
     /**
     * The getProperties method returns the job level properties
     * specified in a job definition.
@@ -438,19 +438,19 @@ public interface JobContext
     * implementation-defined properties.
     * </ul>
     *
-    * *@return* job level properties
+    * @return job level properties
     */
     public Properties getProperties();
     /**
     * The getBatchStatus method simply returns the batch status value * set
     by the batch runtime into the job context.
-    * *@return* batch status string
+    * @return batch status string
     */
     public BatchStatus getBatchStatus();
     /**
     * The getExitStatus method simply returns the exit status value stored
     * into the job context through the setExitStatus method or null.
-    * *@return* exit status string
+    * @return exit status string
     */
     public String getExitStatus();
     /**
@@ -485,14 +485,14 @@ public interface StepContext
 {
     /**
     * Get step name
-    * *@return* value of 'id' attribute from <step>
+    * @return value of 'id' attribute from <step>
     *
     */
     public String getStepName();
     /**
     * The getTransientUserData method returns a transient data object
     * belonging to the current Job XML execution element.
-    * *@return* user-specified type
+    * @return user-specified type
     */
     public Object getTransientUserData();
     /**
@@ -504,9 +504,9 @@ public interface StepContext
     /**
     * The getStepExecutionId method returns the current step's
     * execution id.
-    * *@return* step execution id
+    * @return step execution id
     */
-    public *long* getStepExecutionId();
+    public long getStepExecutionId();
     /**
     * The getProperties method returns the step
     level properties
@@ -525,7 +525,7 @@ public interface StepContext
     * runtime implementation may choose to include additional,
     * implementation-defined properties.
     * </ul>
-    * *@return* step level properties
+    * @return step level properties
     */
     public Properties getProperties();
     /**
@@ -534,7 +534,7 @@ public interface StepContext
     * java.util.Serializable. This data is saved as part of a step's
     * checkpoint. For a step that does not do checkpoints, it is saved
     * after the step ends. It is available upon restart.
-    * *@return* user-specified type
+    * @return user-specified type
     */
     public Serializable getPersistentUserData();
     /**
@@ -550,13 +550,13 @@ public interface StepContext
     * The getBatchStatus method returns the current batch status of the
     * current step. This value is set by the batch runtime and changes as
     * the batch status changes.
-    * *@return* batch status string
+    * @return batch status string
     */
     public BatchStatus getBatchStatus();
     /**
     * The getExitStatus method simply returns the exit status value stored
     * into the step context through the setExitStatus method or null.
-    * *@return* exit status string
+    * @return exit status string
     */
     public String getExitStatus();
     /**
@@ -571,15 +571,15 @@ public interface StepContext
     /**
     * The getException method returns the last exception thrown from a
     * step level batch artifact to the batch runtime.
-    * *@return* the last exception
+    * @return the last exception
     */
     public Exception getException();
     /**
     * The getMetrics method returns an array of step level metrics. These
     * are things like commits, skips, etc.
-    * *@see* jakarta.batch.runtime.metric.Metric for definition of standard
+    * @see jakarta.batch.runtime.metric.Metric for definition of standard
     * metrics.
-    * *@return* metrics array
+    * @return metrics array
     */
     public Metric[] getMetrics();
 }
@@ -600,7 +600,7 @@ package jakarta.batch.runtime;
 */
 public interface Metric
 {
-    public *enum* MetricType
+    public enum MetricType
     {
         READ_COUNT_, _WRITE_COUNT_,
         _COMMIT_COUNT_,
@@ -610,14 +610,14 @@ public interface Metric
     }
     /**
     * The getName method returns the metric type.
-    * *@return* metric type.
+    * @return metric type.
     */
     public MetricType getType();
     /**
     * The getValue method returns the metric value.
-    * *@return* metric value.
+    * @return metric value.
     */
-    public *long* getValue();
+    public long getValue();
 }
 ----
 
@@ -676,7 +676,7 @@ public interface PartitionPlan
     public void setPartitionsOverride(boolean override);
     /**
     * Return current value of partition override setting.
-    * *@return* override setting.
+    * @return override setting.
     */
     public boolean getPartitionsOverride();
     /**
@@ -700,7 +700,7 @@ public interface PartitionPlan
     public void setPartitionProperties(Properties[] props);
     /**
     * Gets count of Partitions.
-    * *@return* Partition count
+    * @return Partition count
     */
     public int getPartitions();
     /**
@@ -712,7 +712,7 @@ public interface PartitionPlan
     it may not have this many
     * available, and may use less.
     *
-    * *@return* requested thread count
+    * @return requested thread count
     */
     public int getThreads();
     /**
@@ -733,7 +733,7 @@ public interface PartitionPlan
     * substitution potentially resolving to the corresponding
     * value for each partition.
     *
-    * *@return* Partition Properties object array
+    * @return Partition Properties object array
     */
     public Properties[]
     getPartitionProperties();
@@ -884,7 +884,7 @@ public interface JobOperator
     /**
     * Returns a set of all job names known to the batch runtime.
     *
-    * *@return* a set of job names.
+    * @return a set of job names.
     * @throws JobSecurityException
     */
     public Set<String> getJobNames() throws JobSecurityException;
@@ -893,7 +893,7 @@ public interface JobOperator
     *
     * @param jobName
     * specifies the name of the job.
-    * *@return* count of instances of the named job.
+    * @return count of instances of the named job.
     * @throws NoSuchJobException
     * @throws JobSecurityException
     */
@@ -913,7 +913,7 @@ public interface JobOperator
     * @param count
     * specifies the number of job instances to return from the
     * starting position of the maximal list of job instances.
-    * *@return* list of JobInstances.
+    * @return list of JobInstances.
     * @throws NoSuchJobException
     * @throws JobSecurityException
     */
@@ -925,7 +925,7 @@ public interface JobOperator
     *
     * @param jobName
     * specifies the job name.
-    * *@return* a list of execution ids.
+    * @return a list of execution ids.
     * @throws NoSuchJobException
     * @throws JobSecurityException
     */
@@ -939,12 +939,12 @@ public interface JobOperator
     * @param executionId
     * specifies the execution from which to retrieve the
     * parameters.
-    * *@return* a Properties object containing the key/value job parameter
+    * @return a Properties object containing the key/value job parameter
     * pairs.
     * @throws NoSuchJobExecutionException
     * @throws JobSecurityException
     */
-    public Properties getParameters(*long* executionId)
+    public Properties getParameters(long executionId)
     throws NoSuchJobExecutionException, JobSecurityException;
     /**
     * Creates a new job instance and starts the first execution of that
@@ -964,11 +964,11 @@ public interface JobOperator
     * @param jobParameters
     * specifies the keyword/value pairs for attribute
     * substitution in the Job XML.
-    * *@return* executionId for the job execution.
+    * @return executionId for the job execution.
     * @throws JobStartException
     * @throws JobSecurityException
     */
-    public *long* start(String jobXMLName, Properties jobParameters)
+    public long start(String jobXMLName, Properties jobParameters)
     throws
     JobStartException, JobSecurityException;
     /**
@@ -981,14 +981,14 @@ public interface JobOperator
     * @param restartParameters
     * specifies the keyword/value pairs for attribute
     * substitution in the Job XML.
-    * *@return* new executionId
+    * @return new executionId
     * @throws JobExecutionAlreadyCompleteException
     * @throws NoSuchJobExecutionException
     * @throws JobExecutionNotMostRecentException,
     * @throws JobRestartException
     * @throws JobSecurityException
     */
-    public *long* restart(*long* executionId, Properties
+    public long restart(long executionId, Properties
     restartParameters)
     throws JobExecutionAlreadyCompleteException,
     NoSuchJobExecutionException,
@@ -1015,7 +1015,7 @@ public interface JobOperator
     * @throws JobExecutionNotRunningException
     * @throws JobSecurityException
     */
-    public void stop(*long* executionId) throws
+    public void stop(long executionId) throws
     NoSuchJobExecutionException,
     JobExecutionNotRunningException, JobSecurityException;
     /**
@@ -1030,7 +1030,7 @@ public interface JobOperator
     * @throws JobExecutionIsRunningException
     * @throws JobSecurityException
     */
-    public void abandon(*long* executionId) throws
+    public void abandon(long executionId) throws
     NoSuchJobExecutionException,
     JobExecutionIsRunningException, JobSecurityException;
     /**
@@ -1038,18 +1038,18 @@ public interface JobOperator
     *
     * @param executionId
     * specifies the job execution.
-    * *@return* job instance
+    * @return job instance
     * @throws NoSuchJobExecutionException
     * @throws JobSecurityException
     */
-    public JobInstance getJobInstance(*long* executionId) throws
+    public JobInstance getJobInstance(long executionId) throws
     NoSuchJobExecutionException, JobSecurityException;
     /**
     * Return all job executions belonging to the specified job instance.
     *
     * @param jobInstance
     * specifies the job instance.
-    * *@return* list of job executions
+    * @return list of job executions
     * @throws NoSuchJobInstanceException
     * @throws JobSecurityException
     */
@@ -1061,22 +1061,22 @@ public interface JobOperator
     *
     * @param executionId
     * specifies the job execution.
-    * *@return* job execution
+    * @return job execution
     * @throws NoSuchJobExecutionException
     * @throws JobSecurityException
     */
-    public JobExecution getJobExecution(*long* executionId) throws
+    public JobExecution getJobExecution(long executionId) throws
     NoSuchJobExecutionException, JobSecurityException;
     /**
     * Return StepExecutions for specified execution id.
     *
     * @param executionId
     * specifies the job execution.
-    * *@return* step executions (order not guaranteed)
+    * @return step executions (order not guaranteed)
     * @throws NoSuchJobExecutionException
     * @throws JobSecurityException
     */
-    public List<StepExecution> getStepExecutions(*long* jobExecutionId)
+    public List<StepExecution> getStepExecutions(long jobExecutionId)
     throws NoSuchJobExecutionException, JobSecurityException;
 }
 ----
@@ -1091,12 +1091,12 @@ public interface JobInstance
 {
     /**
     * Get unique id for this JobInstance.
-    * *@return* instance id
+    * @return instance id
     */
-    public *long* getInstanceId();
+    public long getInstanceId();
     /**
     * Get job name.
-    * *@return* value of 'id' attribute from <job>
+    * @return value of 'id' attribute from <job>
     */
     public String getJobName();
 }
@@ -1115,47 +1115,47 @@ public interface JobExecution
 {
     /**
     * Get unique id for this JobExecution.
-    * *@return* execution id
+    * @return execution id
     */
-    public *long* getExecutionId();
+    public long getExecutionId();
     /**
     * Get job name.
-    * *@return* value of 'id' attribute from <job>
+    * @return value of 'id' attribute from <job>
     */
     public String getJobName();
     /**
     * Get batch status of this execution.
-    * *@return* batch status value.
+    * @return batch status value.
     */
     public BatchStatus getBatchStatus();
     /**
     * Get time execution entered STARTED status.
-    * *@return* date (time)
+    * @return date (time)
     */
     public Date getStartTime();
     /**
     * Get time execution entered end status: COMPLETED, STOPPED, FAILED
-    * *@return* date (time)
+    * @return date (time)
     */
     public Date getEndTime();
     /**
     * Get execution exit status.
-    * *@return* exit status.
+    * @return exit status.
     */
     public String getExitStatus();
     /**
     * Get time execution was created.
-    * *@return* date (time)
+    * @return date (time)
     */
     public Date getCreateTime();
     /**
     * Get time execution was last updated.
-    * *@return* date (time)
+    * @return date (time)
     */
     public Date getLastUpdatedTime();
     /**
     * Get job parameters for this execution.
-    * *@return* job parameters
+    * @return job parameters
     */
     public Properties getJobParameters();
 }
@@ -1174,32 +1174,32 @@ public interface StepExecution
 {
     /**
     * Get unique id for this StepExecution.
-    * *@return* StepExecution id
+    * @return StepExecution id
     */
-    public *long* getStepExecutionId();
+    public long getStepExecutionId();
     /**
     * Get step name.
-    * *@return* value of 'id' attribute from <step>
+    * @return value of 'id' attribute from <step>
     */
     public String getStepName();
     /**
     * Get batch status of this step execution.
-    * *@return* batch status.
+    * @return batch status.
     */
     public BatchStatus getBatchStatus();
     /**
     * Get time this step started.
-    * *@return* date (time)
+    * @return date (time)
     */
     public Date getStartTime();
     /**
     * Get time this step ended.
-    * *@return* date (time)
+    * @return date (time)
     */
     public Date getEndTime();
     /**
     * Get exit status of step.
-    * *@return* exit status
+    * @return exit status
     */
     public String getExitStatus();
     /**
@@ -1211,13 +1211,13 @@ public interface StepExecution
     * or main thread (the one the <code>PartitionAnalyzer</code>, etc.
     * execute on). It does not return the persistent user
     * data of the partition threads.
-    * *@return* persistent data
+    * @return persistent data
     */
     public Serializable
     getPersistentUserData ();
     /**
     * Get step metrics
-    * *@return* array of metrics
+    * @return array of metrics
     */
     public Metric[] getMetrics();
 }
