@@ -66,7 +66,7 @@ public interface ItemReader {
    * It returns null to in dicate no more items, which
    * also means the current chunk will be committed and
    * the step will end.
-   * *@return* next item or null
+   * @return next item or null
    * @throws Exception is thrown for any errors.
    */
   public Object readItem() throws Exception;
@@ -75,7 +75,7 @@ public interface ItemReader {
    * The checkpointInfo method returns the current
    * checkpoint data for this reader. It is
    * called before a chunk checkpoint is committed.
-   * *@return* checkpoint data
+   * @return checkpoint data
    * @throws Exception is thrown for any errors.
    */
   public Serializable checkpointInfo() throws Exception;
@@ -140,7 +140,7 @@ public interface ItemProcessor {
     * to be processed. This effectively enables processItem
     * to filter out unwanted input items.
     * @param item specifies the input item to process.
-    * *@return* output item to write.
+    * @return output item to write.
     * @throws Exception thrown for any errors.
     */
     public Object processItem(Object item) throws Exception;
@@ -207,7 +207,7 @@ public interface ItemWriter {
     * The checkpointInfo method returns the current
     * checkpoint data for this writer. It is
     * called before a chunk checkpoint is committed.
-    * *@return* checkpoint data
+    * @return checkpoint data
     * @throws Exception is thrown for any errors.
     */
     public Serializable checkpointInfo() throws Exception;
@@ -263,7 +263,7 @@ public abstract class AbstractItemWriter implements ItemWriter
     * checkpoints.
     * The default implementation returns null.
     *
-    * *@return* checkpoint data
+    * @return checkpoint data
     * @throws Exception (or subclass) if an error occurs.
     */
     @Override
@@ -321,7 +321,7 @@ public interface CheckpointAlgorithm {
     * the batch runtime after each item is processed
     * to determine if now is the time to checkpoint
     * the current chunk.
-    * *@return* boolean indicating whether or not
+    * @return boolean indicating whether or not
     * to checkpoint now.
     * @throws Exception thrown for any errors.
     */
@@ -378,7 +378,7 @@ CheckpointAlgorithm {
     * Implement logic in this method
     * to decide if a checkpoint should be taken now.
     *
-    * *@return* boolean indicating whether or not
+    * @return boolean indicating whether or not
     * to checkpoint now.
     * @throws Exception (or subclass) if an error occurs.
     */
@@ -431,7 +431,7 @@ public interface Batchlet {
     * throws an exception, the batchlet
     * step ends with a batch status of
     * FAILED.
-    * *@return* exit status string
+    * @return exit status string
     * @throws Exception if an error occurs.
     */
     public String process() throws Exception;
@@ -462,7 +462,7 @@ public abstract class AbstractBatchlet implements Batchlet {
     * Implement process logic for the Batchlet in this
     * method.
     *
-    * *@return* exit status string
+    * @return exit status string
     * @throws Exception (or subclass) if an error occurs.
     */
     @Override
@@ -1402,7 +1402,7 @@ public interface PartitionMapper {
     * start of partitioned step processing. The method
     * returns a PartitionPlan, which specifies the batch properties
     * for each partition.
-    * *@return* partition plan for a partitioned step.
+    * @return partition plan for a partitioned step.
     * @throws Exception is thrown if an error occurs.
     */
     public PartitionPlan mapPartitions( ) throws Exception;
@@ -1437,7 +1437,7 @@ package jakarta.batch.api.partition;
 *
 */
 public interface PartitionReducer {
-    public *enum* PartitionStatus {
+    public enum PartitionStatus {
         COMMIT_, _ROLLBACK
     }
     /**
@@ -1589,7 +1589,7 @@ public interface PartitionCollector {
     * Note the collector is not called if the partition
     * terminates due to an unhandled exception.
     * <p>
-    * *@return* an Serializable object to pass to the
+    * @return an Serializable object to pass to the
     * PartitionAnalyzer.
     * @throws Exception is thrown if an error occurs.
     */
@@ -1744,7 +1744,7 @@ public interface Decider {
     * </ul>
     * @param executions specifies the StepExecution(s) of the preceding
     * element.
-    * *@return* updated job exit status
+    * @return updated job exit status
     * @throws Exception is thrown if an error occurs.
     */
     public String decide(StepExecution[] executions) throws Exception;
