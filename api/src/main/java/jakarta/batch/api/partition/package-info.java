@@ -18,6 +18,6 @@
 */
 /**
  * Provides APIs for artifacts specific to a Batch partitioned step.
- * @version 1.0
+ * @version 2.0
  */
 package jakarta.batch.api.partition;

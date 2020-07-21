@@ -18,6 +18,6 @@
 */
 /**
  * Provides APIs for starting, managing, and viewing results of Batch job executions, along with a set of exceptions.
- * @version 1.0
+ * @version 2.0
  */
 package jakarta.batch.operations;

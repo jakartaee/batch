@@ -18,6 +18,6 @@
 */
 /**
  * Provides APIs for context classes allowing data sharing across Batch artifacts within a job instance and within a step.
- * @version 1.0
+ * @version 2.0
  */
 package jakarta.batch.runtime.context;

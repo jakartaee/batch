@@ -18,6 +18,6 @@
 */
 /**
  * Provides APIs defining Batch job-level and step-level listener artifacts.
- * @version 1.0
+ * @version 2.0
  */
 package jakarta.batch.api.listener;
