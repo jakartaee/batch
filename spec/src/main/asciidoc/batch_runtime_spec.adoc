@@ -631,7 +631,7 @@ package jakarta.batch.api.partition;
 /**
 *
 * PartitionPlan is a helper class that carries partition processing
-* information set by the *@PartitionMapper* method.
+* information set by the @PartitionMapper method.
 *
 * A PartitionPlan contains:
 * <ol>
