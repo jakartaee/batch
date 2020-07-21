@@ -53,6 +53,13 @@
                 </includes>
                 <targetPath>META-INF</targetPath>
             </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources/jakarta/xml/batch</directory>
+                <includes>
+                    <include>*.xsd</include>
+                </includes>
+                <targetPath>xsd</targetPath>
+            </resource>
         </resources>
         <plugins>
             <plugin>
