@@ -127,7 +127,7 @@
 
         <!-- Dependencies -->
         <version.jakarta.enterprise.jakarta.enterprise.cdi-api>3.0.0-M4</version.jakarta.enterprise.jakarta.enterprise.cdi-api>
-        <version.jakarta.inject.jakarta.inject-api>2.0.0.RC4</version.jakarta.inject.jakarta.inject-api>
+        <version.jakarta.inject.jakarta.inject-api>2.0.0-RC4</version.jakarta.inject.jakarta.inject-api>
 
         <version.org.sonatype.plugins.nexus-staging-maven-plugin>1.6.6</version.org.sonatype.plugins.nexus-staging-maven-plugin>
         <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
