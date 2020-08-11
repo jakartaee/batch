@@ -64,7 +64,7 @@ The 'properties' element may be specified as a child element of the job
 element. It is used to expose properties to any batch artifact belonging
 to the job and also to the batch runtime. Any number of properties may
 be specified. Job level properties are available through the JobContext
-runtime object. See section xref:_batch_contexts[9.4] for further information about Job
+runtime object. See section xref:batch-contexts[9.4] for further information about Job
 Context.
 
 Syntax:
@@ -91,7 +91,7 @@ be a valid XML string value. This is a required attribute.
 The 'step' element identifies a job step and its characteristics. Step
 is a child element of job. A job may contain any number of steps. Each
 step may be either a chunk type step or batchlet type step. See section
-xref:_chunk[8.2.1] for information on chunk type steps and section xref:_batchlet[8.2.2] for
+xref:chunk[8.2.1] for information on chunk type steps and section xref:batchlet[8.2.2] for
 information on batchlet type steps.
 
 Syntax:
@@ -137,7 +137,7 @@ of the step element. A chunk type step is periodically checkpointed by
 the batch runtime according to a configured checkpoint policy. Items
 processed between checkpoints are referred to as a "chunk". A single
 call is made to the ItemWriter per chunk. Each chunk is processed in a
-separate transaction. See section xref:_transactionality[9.7] for more details on
+separate transaction. See section xref:transactionality[9.7] for more details on
 transactionality. A chunk that is not complete is restartable from its
 last checkpoint. A chunk that is complete and belongs to a step
 configured with allow-start-if-complete=true runs from the beginning
@@ -355,7 +355,7 @@ processor, and writer batch artifacts of a chunk type step. It also applies
 to exceptions thrown during checkpoint commit processing. A failed
 commit will be treated the same as a failed write. The total number of
 skips is set by the skip-limit attribute on the chunk element. See
-section xref:_chunk[8.2.1] for details on the chunk element.
+section xref:chunk[8.2.1] for details on the chunk element.
 
 A given exception will be skipped if it "matches" an include child
 element of the skippable-exception-classes element, though this might be
@@ -381,7 +381,7 @@ exception.
 
 Optional Skip Listener batch artifacts can be configured to the step. A
 Skip Listener receives control after a skippable exception is thrown by
-the reader, processor, or writer. See section xref:_skip_listener_interfaces[9.2.7] for details on the
+the reader, processor, or writer. See section xref:skip-listener-interfaces[9.2.7] for details on the
 Skip Listener batch interfaces.
 
 Syntax:
@@ -434,7 +434,7 @@ chunk element. It applies to exceptions thrown from the reader,
 processor, or writer batch artifacts of a chunk type step. It also
 applies to exceptions thrown by checkpoint commit processing. The total
 number of retry attempts is set by the retry-limit attribute on the
-chunk element. See section xref:_chunk[8.2.1] for details on the chunk element.
+chunk element. See section xref:chunk[8.2.1] for details on the chunk element.
 
 The list of exceptions that will be retried (or not retried) is
 specified in the retryable-exception-classes element on the child
@@ -446,7 +446,7 @@ in section 8.2.1.4.1 for skipping exceptions.
 
 Optional Retry Listener batch artifacts can be configured on the step. A
 Retry Listener receives control after a retryable exception is thrown by
-the reader, processor, or writer. See section xref:_retrylistener_interface[9.2.8] for details on the
+the reader, processor, or writer. See section xref:retrylistener-interface[9.2.8] for details on the
 Retry Listener batch artifact.
 
 
@@ -521,7 +521,7 @@ This element is a child element of the chunk element. If a retryable
 exception is thrown the default behavior is to rollback before retry. If
 an exception is specified as both a retryable and a no-rollback
 exception, then no rollback occurs and the current operation is retried.
-Retry Listeners, if configured, are invoked. See section xref:_retrylistener_interface[9.2.8] for
+Retry Listeners, if configured, are invoked. See section xref:retrylistener-interface[9.2.8] for
 details on the Retry Listener batch artifact.
 
 The rules for determining whether a combination of include and exclude
@@ -611,7 +611,7 @@ be a valid XML string value. This is a required attribute.
 
 The batchlet element specifies a task-oriented batch step. It is
 specified as a child element of the step element. It is mutually
-exclusive with the chunk element. See xref:_batchlet_interface[9.1.2] for further details about
+exclusive with the chunk element. See xref:-batchlet-interface[9.1.2] for further details about
 batchlets. Steps of this type are useful for performing a variety of
 tasks that are not item-oriented, such as executing a command or doing
 file transfer.
@@ -632,7 +632,7 @@ Where:
 
 ===== Batchlet Exception Handling
 
-This section is superseded by section xref:_step_exception_handling[8.2.7].
+This section is superseded by section xref:step-exception-handling[8.2.7].
 
 ===== Batchlet Properties
 
@@ -668,7 +668,7 @@ The 'properties' element may be specified as a child element of the step
 element. It is used to expose properties to any step level batch
 artifact and also to the batch runtime. Any number of properties may be
 specified. Step level properties are available through the StepContext
-runtime object. See section xref:_batch_contexts[9.4] for further information about
+runtime object. See section xref:batch-contexts[9.4] for further information about
 StepContext.
 
 Syntax:
@@ -799,8 +799,8 @@ inside a flow, the id must match another step in the same flow. This is
 a required attribute.
 |=======================================================================
 
-See section  xref:_transition_elements[8.6] for more details about transition
-elements and section xref:_transitioning_rules[8.9] for details on transitioning rules.
+See section  xref:transition-elements[8.6] for more details about transition
+elements and section xref:transitioning-rules[8.9] for details on transitioning rules.
 
 ==== Step Partitioning
 
@@ -860,7 +860,7 @@ XML declaratively or dynamically at runtime with a partition mapper.
 
 The 'plan' element is a child element of the 'partition' element. The
 'plan' element is mutually exclusive with partition mapper element. See
-section xref:_partitionmapper_interface[9.5.1] for further details on partition mapper.
+section xref:partitionmapper-interface[9.5.1] for further details on partition mapper.
 
 Note the specification does not attempt to guarantee order of partition
 execution with respect to the order within a statically or
@@ -906,14 +906,14 @@ into 3 partitions on 2 threads:
 
 When defining a statically partitioned step, it is possible to specify
 unique property values to pass to each partition directly in the Job XML
-using the property element. See section xref:_partitionmapper_interface[9.5.1] for further information on
+using the property element. See section xref:partitionmapper-interface[9.5.1] for further information on
 partition mapper.
 
 Syntax:
 
 [source,xml]
 ----
- <properties partition="_partition-number_">
+ <properties partition="{partition-number}">
   <property name="{property-name}" value="{name-value}"/>
  </properties>
 ----
@@ -961,7 +961,7 @@ The partition mapper provides a programmatic means for calculating the
 number of partitions and threads for a partitioned step. The partition
 mapper also specifies the properties for each partition. The mapper
 element specifies a reference to a PartitionMapper batch artifact; see
-section xref:_partitionmapper_interface[9.5.1] for further information. Note the mapper element is
+section xref:partitionmapper-interface[9.5.1] for further information. Note the mapper element is
 mutually exclusive with the plan element.
 
 Syntax:
@@ -1020,7 +1020,7 @@ partition reducer provides a kind of unit of work demarcation around the
 processing of the partitions. Programmatic interception of the
 partitioned step's lifecycle is possible through the partition reducer.
 The reducer element specifies a reference to a PartitionReducer batch
-artifact; see section xref:_partitionreducer_interface[9.5.2] for further information.
+artifact; see section xref:partitionreducer-interface[9.5.2] for further information.
 
 The 'reducer' element is a child element of the 'partition' element.
 
@@ -1082,10 +1082,10 @@ partition of the step. The collector is invoked at the conclusion of
 each checkpoint for chunking type steps and again at the end of
 partition; it is invoked once at the end of partition for batchlet type
 steps. A collector returns a Java Serializable object, which is
-delivered to the step's Partition Analyzer. See section xref:_partitionanalyzer_interface[9.5.4] for
+delivered to the step's Partition Analyzer. See section xref:partitionanalyzer-interface[9.5.4] for
 further information about the Partition Analyzer. The collector element
 specifies a reference to a PartitionCollector batch artifact; see
-section xref:_partitioncollector_interface[9.5.3] for further information.
+section xref:partitioncollector-interface[9.5.3] for further information.
 
 The 'collector' element is a child element of the 'partition' element.
 
@@ -1149,7 +1149,7 @@ PartitionAnalyzer also receives control with the partition exit status
 for each partition, after that partition ends. An analyzer can be used
 to implement custom exit status handling for the step, based on the
 results of the individual partitions. The analyzer element specifies a
-reference to a PartitionAnalyzer batch artifact; see section xref:_partitionanalyzer_interface[9.5.4] for
+reference to a PartitionAnalyzer batch artifact; see section xref:partitionanalyzer-interface[9.5.4] for
 further information.
 
 Syntax:
@@ -1212,7 +1212,7 @@ processing causes the step to terminate with a batch status of FAILED.
 In this context, "unhandled" means an exception thrown by the execution
 of the artifact back to the runtime implementation which does not result
 in a skip or a retry as described in section 8.2.1.4.
- See section xref:_transitioning_precedence_rules[8.9.2] for complete details on
+ See section xref:transitioning-precedence-rules[8.9.2] for complete details on
 transitioning after an unhandled exception.
 
 === Flow
@@ -1221,11 +1221,11 @@ A flow defines a sequence of execution elements that execute together as
 a unit. When the flow is finished, it is the entire flow that
 transitions to the next execution element. A flow may transition to a
 step, split, decision, or another flow. A flow may contain step, flow,
-decision, and split execution elements. See section xref:_decision[8.5] for more on
-decisions. See section xref:_split[8.4] for more on splits. The execution elements
+decision, and split execution elements. See section xref:decision[8.5] for more on
+decisions. See section xref:split[8.4] for more on splits. The execution elements
 within a flow may only transition among themselves; they may not
 transition to elements outside of the flow. A flow may also contain the
-transition elements next, stop, fail, and end. See section xref:_transition_elements[8.6] for more
+transition elements next, stop, fail, and end. See section xref:transition-elements[8.6] for more
 on transition elements.
 
 Syntax:
@@ -1255,7 +1255,7 @@ a loop occurs among steps.
 === Split
 
 A split defines a set of flows that execute concurrently. A split may
-include only flow elements as children. See section xref:_flow[8.3] for more on
+include only flow elements as children. See section xref:flow[8.3] for more on
 flows. Each flow runs on a separate thread. The split is finished after
 all flows complete. When the split is finished, it is the entire split
 that transitions to the next execution element. A split may transition
@@ -1291,7 +1291,7 @@ a loop occurs among steps.
 The effort of the initial 1.0 final release specification to define
 split termination processing is recognized as incomplete. This is
 related to the recognition that flow transitioning is incomplete
-(section xref:_flow_level_transitions[8.9.5]).
+(section xref:flow-level-transitions[8.9.5]).
 
 As such, there is no well-defined mechanism for "passing back" status
 from the individual child flows of a split and aggregating them into a
@@ -1326,10 +1326,10 @@ steps, flows, and splits. The decision element may follow a step, flow,
 or split. A job may contain any number of decision elements. A decision
 element is the target of the "next" attribute from a job-level step,
 flow, split, or another decision. A decision must supply a decider batch
-artifact (see section xref:_decider_interface[9.6]). The decider's purpose is to decide the next
+artifact (see section xref:decider-interface[9.6]). The decider's purpose is to decide the next
 transition. The decision uses any of the transition elements, stop,
 fail, end, and next elements to select the next transition. See section
-xref:_transition_elements[8.6] for further information on transition elements. The decider return
+xref:transition-elements[8.6] for further information on transition elements. The decider return
 value will also be set as the current value of the job exit status, in
 addition to being matched against the decisions own child transition
 elements to decide the next transition.
@@ -1338,7 +1338,7 @@ Syntax:
 
 [source,xml]
 ----
- <decision id="{name}" ref="{ref_-_name}">
+ <decision id="{name}" ref="{ref-name}">
 ----
 
 Where:
@@ -1417,7 +1417,7 @@ Syntax:
 
 [source,xml]
 ----
- <next on="{exit status}" to="{step id_|_flow id_|_split id}"/>
+ <next on="{exit status}" to="{step id | flow id | split id}"/>
 ----
 
 Where:
@@ -1543,7 +1543,7 @@ decision elements.
 
 [source,xml]
 ----
-<stop on="{exit status}" exit-status="{exit status}" restart="{step id_|_flow id_|_split id}"/>
+<stop on="{exit status}" exit-status="{exit status}" restart="{step id | flow id | split id}"/>
 ----
 
 Where:
@@ -1625,13 +1625,13 @@ A job execution will end under the following conditions:
 
 . A job-level execution element (step, flow, or split) finishes
 execution, without specifying a "next" attribute and without the exit
-status matching any transition elements. (See section xref:_transitioning_precedence_rules[8.9.2] for
+status matching any transition elements. (See section xref:transitioning-precedence-rules[8.9.2] for
 details).  In this case, the batch status is set
 to COMPLETED.
 . A step throws an exception to the batch runtime that does not match
 skip or retry criteria, with the exit status not matching any transition
 elements. In this case, the batch status is set to FAILED. (See section
-xref:_transitioning_precedence_rules[8.9.2] for details).  In the case of partitioned
+xref:transitioning-precedence-rules[8.9.2] for details).  In the case of partitioned
 or concurrent (split) step execution, all other still-running parallel
 instances are allowed to complete before the job ends with FAILED batch
 status.
@@ -1648,7 +1648,7 @@ batch status to STARTED .
 status setter method on the JobContext object.
 . Exit status can be overridden by a decision element.
 . Exit status can be overridden by a terminating transition element on
-a step, flow, or split. See section xref:_transition_elements[8.6].
+a step, flow, or split. See section xref:transition-elements[8.6].
 . Final batch status is set by the batch runtime depending on the
 outcome of the job. See table above. Exit status is set to the final
 batch status if it was not overridden by any of the override means
@@ -1679,11 +1679,11 @@ the step, by the batch runtime. [line-through]#Step exit status is
 initially set to the same value as batch
 status.#  Step exit status may be set by any
 batch artifact configured to the step by invoking the exit status setter
-method in the StepContext object. See section xref:_batch_contexts[9.4] for further
+method in the StepContext object. See section xref:batch-contexts[9.4] for further
 information about the StepContext object. Setting the step exit status
 does not alter the execution of the current step, but rather, is
 available to influence the execution of subsequent steps via transition
-elements (see xref:_transition_elements[8.6]) and deciders (see xref:_decider_interface[9.6]). If no batch artifact sets the
+elements (see xref:transition-elements[8.6]) and deciders (see xref:decider-interface[9.6]). If no batch artifact sets the
 exit status, the batch runtime will default the value to the string form
 of the batch status value of the step when step execution completes.
 An important point to note is that transition elements do not affect the
@@ -1715,7 +1715,7 @@ this case).
 Note the implications for restart processing. For example, a completed
 step wont re-run just because the step includes a transition element
 failing the job on the original step executions exit status. See section
-xref:_supporting_classes[10.8] for more on restart processing.
+xref:supporting-classes[10.8] for more on restart processing.
 
 ==== Exit Status for Partitioned Steps
 
@@ -1781,7 +1781,7 @@ job can be started or restarted, except for the partitionPlan operator,
 which has deferred resolution - see section 8.8.1.4 for more on that.
 After substitution expression resolution, the resultant XML document
 must be checked for validity, according to the guidelines outlined in
-section xref:_job_specification_language_2[13], Job Specification Language XSD.
+section xref:job-specification-language-2[13], Job Specification Language XSD.
 
 A substitution expression may reference a job parameter or a job
 property by specifying the name of the parameter or property through a
@@ -2072,7 +2072,7 @@ transitions to the element named by this next attribute value.
 3.  If execution ended normally, and the execution element whose
 execution is completing does not contain a next attribute, then the job
 ends normally (with COMPLETED batch status). For transitioning from a
-step within a flow, this statement doesnt apply. See section xref:_transitioning_from_within_flows[8.9.4] for
+step within a flow, this statement doesnt apply. See section xref:transitioning-from-within-flows[8.9.4] for
 details.
 
 The following examples illustrate how the above rules might be employed:
@@ -2101,7 +2101,7 @@ RecoveryStep.
 
 Note that the second example shows it is possible for a job to executed
 to COMPLETED status, even though a constituent step ends with FAILED
-batch status (See section xref:_step_exception_handling[8.2.7]).
+batch status (See section xref:step-exception-handling[8.2.7]).
 
 ==== Loop definition
 
@@ -2119,11 +2119,11 @@ transitioned (back) to "step1". This may only be a single execution of
 prohibition.
 
 The runtime may detect potential loops in an initial validation phase,
-as described in section xref:_validation_rules[13.1], or may only detect loops once they occur.
+as described in section xref:validation-rules[13.1], or may only detect loops once they occur.
 
 ==== Transitioning From Within Flows
 
-. As mentioned in section xref:_flow[8.3], an execution element which is a child of a
+. As mentioned in section xref:flow[8.3], an execution element which is a child of a
 flow may only transition to another execution element within the same
 flow. The flows transition elements, however, would transition execution
 to the next execution element at the level of the execution scope
@@ -2136,7 +2136,7 @@ failed or ended yet with another level of transitioning occurring at the
 containing (e.g. job) level.
 
 .. Note: transition via next outside of the flow is not permitted. If
-this is not detected during job validation (see section xref:_validation_rules[13.1]), then at
+this is not detected during job validation (see section xref:validation-rules[13.1]), then at
 runtime the job execution will end at this point with batch status of
 FAILED.
 
@@ -2145,18 +2145,18 @@ matching transition elements as well as no next attribute at the level
 of this child of a flow, then the flow ends.
 
 Another way of stating rules #2 and #3 in this section would be to say
-that all the rules in section xref:_transitioning_precedence_rules[8.9.2] apply to transitions within flows
+that all the rules in section xref:transitioning-precedence-rules[8.9.2] apply to transitions within flows
 (i.e. among children of flows) and are effective at the job level,
-except for rule #3 in section xref:_transitioning_precedence_rules[8.9.2] (this case does not necessarily end
+except for rule #3 in section xref:transitioning-precedence-rules[8.9.2] (this case does not necessarily end
 the job).
 
-See the example at the end of section xref:_flow_level_transitions[8.9.5] for further clarification.
+See the example at the end of section xref:flow-level-transitions[8.9.5] for further clarification.
 
 ==== Flow-level Transitions Undefined
 
 It is recognized that the specification is incomplete with respect to
 how exactly flow transition elements are evaluated. Though the list in
-section xref:_partitionplan[10.8.4] has an assertion in rule 3.e. that suggests using the
+section xref:partitionplan[10.8.4] has an assertion in rule 3.e. that suggests using the
 exit status of the last contained execution element as a flow-level exit
 status, this does not seem to be a complete definition. For example,
 what if the last execution element within the flow is a split
@@ -2196,10 +2196,10 @@ As noted in the comments inline, this example makes the following
 points:
 
 * that a child of a flow can only transition to another child of
-the same flow (Item 1. in section xref:_transitioning_from_within_flows[8.9.4])
+the same flow (Item 1. in section xref:transitioning-from-within-flows[8.9.4])
 
 * that a terminating transition terminates the job, not just the
-flow somehow (Item 2. in section xref:_transitioning_from_within_flows[8.9.4])
+flow somehow (Item 2. in section xref:transitioning-from-within-flows[8.9.4])
 
 * that a transition element which is a direct child of the flow
-itself is currently UNDEFINED (section xref:_flow_level_transitions[8.9.5])
+itself is currently UNDEFINED (section xref:flow-level-transitions[8.9.5])

@@ -47,7 +47,7 @@ particular step within a job execution.
 |=======================================================================
 
 Note instanceId, executionId, and stepExecutionId are all globally
-unique values within a job repository. See section xref:_job_repository[7.4] for explanation
+unique values within a job repository. See section xref:job-repository[7.4] for explanation
 of job repository.
 
 === JobOperator
@@ -68,7 +68,7 @@ following loaders in the order specified:
 
 1.  Implementation-specific loader +
 +
-The batch runtime implementation _may_provide an
+The batch runtime implementation _may_ provide an
 implementation-specific means by which batch artifacts references in a Job XML (i.e. via the 'ref=' attribute) are resolved to an implementation class and instantiated. When the batch runtime resolves a batch artifact reference to an instance the implementation-specific mechanism (if one exists) is attempted first. The loader must return an
 instance or null. +
 +
@@ -84,7 +84,7 @@ an instance or null. +
 +
 The `batch.xml` file is packaged by the developer with the application under the '`META-INF`' directory ('`WEB-INF/classes/META-INF`' for .war files). +
 +
-See xref:_job_parameters_on_restart[10.7.1] for more about the `batch.xml` file.
+See xref:job-parameters-on-restart[10.7.1] for more about the `batch.xml` file.
 
 3.  Thread Context Class Loader +
 +
@@ -100,7 +100,7 @@ order specified:
 
 1.  implementation-specific loader +
 +
-The batch runtime implementation _must_provide an implementation-specific means by which Job XML references are resolved to a Job XML document. +
+The batch runtime implementation _must_ provide an implementation-specific means by which Job XML references are resolved to a Job XML document. +
 +
 The purpose of an implementation-specific loader is to enable Job XMLloading from outside of the application archive, such as from a repository, file system, remote cache, or elsewhere.
 
@@ -111,7 +111,7 @@ from the `META-INF/batch-jobs` directory. +
 +
 Job XML documents may be packaged by the developer with the application under the '`META-INF/batch-jobs`' directory ('`WEB-INF/classes/META-INF`/batch-jobs' for .war files). +
 +
-See xref:_job_xml_substitution_during_restart[10.7.2] for more about the `META-INF/batch-jobs`.
+See xref:job-xml-substitution-during-restart[10.7.2] for more about the `META-INF/batch-jobs`.
 
 === Application Packaging Model
 The batch artifacts that comprise a batch application requiring no
@@ -124,7 +124,7 @@ method).
 
 ==== `META-INF/batch.xml`
 
-A batch application may use the archive loader (see section xref:_job_xml_loading[10.5]) to
+A batch application may use the archive loader (see section xref:job-xml-loading[10.5]) to
 load batch artifacts. The application can direct artifact loading by
 supplying an optional `batch.xml` file. The `batch.xml` file must be stored
 under the `META-INF` directory. For .jar files it is the standard `META-INF`
@@ -151,7 +151,7 @@ batch artifact implementation.
 Notes:
 
 1. If an implementation-specific loader is used (see
-xref:_job_xml_loading[10.5]) any artifact it loads takes precedence over artifacts specified in `batch.xml`.
+xref:job-xml-loading[10.5]) any artifact it loads takes precedence over artifacts specified in `batch.xml`.
 
 2. Use of `batch.xml` to load batch artifacts requires the
 availability of a zero-argument constructor (either a default
@@ -160,7 +160,7 @@ constructor ).
 
 ==== `META-INF/batch-jobs`
 
-A batch application may use the archive loader (see section xref:_application_packaging_model[10.6]) to
+A batch application may use the archive loader (see section xref:application-packaging-model[10.6]) to
 load Job XML documents. The application does this by storing the Job XML
 documents under the `META-INF/batch-jobs` directory. For .jar files the
 batch-jobs directory goes under the standard `META-INF` directory. For
@@ -177,7 +177,7 @@ specified on the JobOperator.start command.
 |.xml |Specifies required file type of a Job XML file under
 `META-INF/batch-jobs`.
 |=======================================================================
-Note if an implementation-specific loader (see xref:_application_packaging_model[10.6]) loads a Job XML
+Note if an implementation-specific loader (see xref:application-packaging-model[10.6]) loads a Job XML
 document that document takes precedence over documents stored under
 `META-INF/batch-jobs`.
 
@@ -235,12 +235,12 @@ provided below.
 Upon restart, the job is processed as follows:
 
 [arabic]
-. Job XML Substitution is performed (see section xref:_job_xml_substitution[8.8]).
+. Job XML Substitution is performed (see section xref:job-xml-substitution[8.8]).
 . Start by setting the current position to the restart position. The restart position is either:
 .. the execution element identified by the <stop> elements "restart"
 attribute if that is how the previous execution ended; else
 .. the initial execution element determined the same as upon initial
-job start, as described in section xref:_step_sequence[8.2.5] Step Sequence;
+job start, as described in section xref:step-sequence[8.2.5] Step Sequence;
 . Determine if the current execution element should re-execute:
 .. If the current execution element is a COMPLETED step that specifies allow-restart-if-complete=false, then transition based on the exit status for this step from the previous completed execution. If the transition is a next transition, then repeat step 3 here with the value of next as the new, "current" execution element. Or, if the transition
 is a terminating transition such as end, stop, or fail, then terminate
@@ -256,11 +256,11 @@ exit status from the new step execution.+
 +
 Note if the step is a partitioned step, only the partitions that did not
 complete previously are restarted. This behavior may be overridden via a
-PartitionMapper (see section xref:_batchruntime[10.8.5]).  Note
+PartitionMapper (see section xref:batchruntime[10.8.5]).  Note
 for a partitioned step, the checkpoints and persistent user data are
 loaded from the persistent store on a per-partition basis (this is not a
 new rule, but a fact implied by the discussion of checkpoints in section
-xref:_step_partitioning[8.2.6] and the Step Context in section 9.4.1.1, which is summarized here
+xref:step-partitioning[8.2.6] and the Step Context in section 9.4.1.1, which is summarized here
 for convenience).
 ..  If the current execution element is a decision, execute the decision
 (i.e. execute the Decider) unconditionally. The Deciders "decide" method
@@ -274,7 +274,7 @@ StepExecution(s) in the same array.
 execution element in the flow and perform step 3 with this as the
 current element. When restart processing of the flow has completed, then
 follow the same rules which apply during the original execution (see
-section xref:_transitioning_rules[8.9]) to transition at the flow level to the next execution
+section xref:transitioning-rules[8.9]) to transition at the flow level to the next execution
 element, and repeat step 3 with that element as the current element. +
 +
 Note the same rules regarding transitioning within a flow during an

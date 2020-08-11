@@ -84,7 +84,7 @@ from where you left off'.
 Job parameters can be specified each time a job is started or restarted.
 Job parameters are keyword/value string pairs. The JobOperator start and
 restart operations support the specification of job parameters. See
-section xref:_joboperator_2[10.4] for further details on JobOperator.
+section xref:joboperator-2[10.4] for further details on JobOperator.
 
 ==== JobExecution
 A JobExecution refers to the technical concept of a single attempt to
@@ -118,7 +118,7 @@ StepExecution will only be created when its Step is actually started.
 JobOperator provides an interface to manage all aspects of job
 processing, including operational commands, such as start, restart, and
 stop, as well as job repository related commands, such as retrieval of
-job and step executions. See section xref:_joboperator_2[10.4] for more details about
+job and step executions. See section xref:joboperator-2[10.4] for more details about
 JobOperator.
 
 === Job Repository
