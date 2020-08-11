@@ -80,7 +80,7 @@ Please contact the Jakarta Batch mailing list with concerns.
 
 [width="100%",cols="<50%,<50%",]
 |=======================================================================
-|Bug 5389 |In Sec. xref:meta-infbatch-xml[10.8.1], should we have said we require a "no-arg" explicit or implicit constructor rather than a "default constructor"
+|Bug 5389 |In Sec. xref:meta-infbatch-xml[10.7.1], should we have said we require a "no-arg" explicit or implicit constructor rather than a "default constructor"
 |Bug 4827 |SPEC: Misspoke on collector role on exit status
 |Bug 5490 |Clarify JobContext/StepContext properties; fix TCK to not depend on writable Properties
 |Bug 5431 |ItemProcessListener#onProcessError has javadoc from ItemProcessListener#afterProcess

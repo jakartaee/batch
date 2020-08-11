@@ -164,8 +164,7 @@ behavior for this chunk. Valid values are: "item" or "custom". The
 of items are processed. The "custom" policy means the chunk is
 checkpointed according to a checkpoint algorithm implementation.
 Specifying "custom" requires that the checkpoint-algorithm element is
-also specified. See section 8.2.1.5 for checkpoint-algorithm. It is an
-optional attribute. The default policy is "item".
+also specified. See section xref:checkpoint-algorithm[8.2.1.5] for checkpoint-algorithm. It is an optional attribute. The default policy is "item".
 
 |item-count |Specifies the number of items to process per chunk when
 using the item checkpoint policy. It must be valid XML integer. It is an
@@ -442,7 +441,7 @@ include element. This list, however, may be modified using one or more
 child exclude elements. The rules for deciding whether to retry or not
 retry a given exception when a combination of include and exclude
 elements are used are analogous to the rules described in the discussion
-in section 8.2.1.4.1 for skipping exceptions.
+in section xref:skipping-exceptions[8.2.1.4.1] for skipping exceptions.
 
 Optional Retry Listener batch artifacts can be configured on the step. A
 Retry Listener receives control after a retryable exception is thrown by
@@ -500,7 +499,7 @@ retryable since the exception is already being retried.
 
 This allows an exception to initially be retried for the entire chunk
 and then skipped if it recurs. When retrying with default retry behavior
-(see section 8.2.1.4.4) the skips can occur for individual items, since
+(see section xref:default-retry-behavior-rollback[8.2.1.4.4]) the skips can occur for individual items, since
 the retry is done with an item-count of 1.
 
 ====== Default Retry Behavior - Rollback
@@ -511,7 +510,7 @@ item-count of 1 and a checkpoint policy of item. If the optional
 ChunkListener is configured on the step, the onError method is called
 before rollback. The default retry behavior can be overridden by
 configuring the no-rollback-exception-classes element. See section
-8.2.1.4.5 for more information on specifying no-rollback exceptions.
+xref:preventing-rollback-during-retry[8.2.1.4.5] for more information on specifying no-rollback exceptions.
 
 ====== Preventing Rollback During Retry
 
@@ -527,7 +526,7 @@ details on the Retry Listener batch artifact.
 The rules for determining whether a combination of include and exclude
 child elements of no-rollback-exception-classes results in the "no
 rollback" behavior or not are analogous to the rules described in the
-discussion in section 8.2.1.4.1 for skipping exceptions.
+discussion in section xref:skipping-exceptions[8.2.1.4.1] for skipping exceptions.
 
 Syntax:
 
@@ -562,7 +561,7 @@ algorithm. It is a child element of the chunk element. It is valid when
 the chunk element checkpoint-policy attribute specifies the value
 'custom'. A custom checkpoint algorithm may be used to provide a
 checkpoint decision based on factors other than only number of items, or
-amount of time. See section 9.1.1.4 for further information about custom
+amount of time. See section xref:checkpointalgorithm-interface[9.1.1.4] for further information about custom
 checkpoint algorithms.
 
 Syntax:
@@ -1211,7 +1210,7 @@ Any unhandled exception thrown by any step-level artifact during step
 processing causes the step to terminate with a batch status of FAILED.
 In this context, "unhandled" means an exception thrown by the execution
 of the artifact back to the runtime implementation which does not result
-in a skip or a retry as described in section 8.2.1.4.
+in a skip or a retry as described in section xref:chunk-exception-handling[8.2.1.4].
  See section xref:transitioning-precedence-rules[8.9.2] for complete details on
 transitioning after an unhandled exception.
 
@@ -1778,7 +1777,7 @@ following expression language is supported on all attributes:
 Substitution expressions are processed for both initial job start and on
 job restart. All substitution expressions must be resolved before the
 job can be started or restarted, except for the partitionPlan operator,
-which has deferred resolution - see section 8.8.1.4 for more on that.
+which has deferred resolution - see section xref:partitionplan-substitution-operator[8.8.1.4] for more on that.
 After substitution expression resolution, the resultant XML document
 must be checked for validity, according to the guidelines outlined in
 section xref:job-specification-language-2[13], Job Specification Language XSD.
@@ -1980,8 +1979,7 @@ that decision and applies it to that step on the next job execution,
 once the previous job execution is restarted. The decision cannot be
 altered by a substitution expression. The decision can be altered,
 however, through a PartitionMapper artifact by specifying the "override"
-option in the PartitionPlan object. See section 10.9.4 for details on
-the PartitionPlan class.
+option in the PartitionPlan object. See section xref:partitionplan[10.9.4] for details on the PartitionPlan class.
 
 ==== Examples
 [source,xml]

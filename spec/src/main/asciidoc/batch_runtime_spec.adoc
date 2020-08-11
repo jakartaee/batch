@@ -22,7 +22,7 @@ The batch runtime supports the following chunk-type step metrics:
 .  writeSkipCount - the number of skippable exceptions thrown by the ItemWriter.
 
 These metrics are available through the StepExecution runtime object.
-See section 10.9.10 for further information on StepExecution.
+See section xref:stepexecution-2[10.9.10] for further information on StepExecution.
 
 === Job Runtime Identifiers
 
@@ -53,13 +53,13 @@ of job repository.
 === JobOperator
 
 The JobOperator interface provides a set of operations to start, stop,
-restart, and inspect jobs. See 10.9.6 for detailed description of this
+restart, and inspect jobs.  See xref:joboperator-3[10.9.7] for detailed description of this
 interface. The JobOperator interface is accessible via a factory
 pattern:
 
  JobOperator jobOper = BatchRuntime.getJobOperator();
 
-See section 10.9.5 for details on the BatchRuntime class.
+See section xref:batchruntime[10.9.5] for details on the BatchRuntime class.
 
 === Batch Artifact Loading
 
@@ -93,7 +93,7 @@ If the archive loader fails to resolve a batch artifact reference (returns null)
 === Job XML Loading
 
 Job XML is specified by name on the JobOperator.start command (see
-10.9.6) to start a job.
+ xref:joboperator-3[10.9.7]) to start a job.
 
 All Job XML references are loadable by the following loaders in the
 order specified:
@@ -197,9 +197,9 @@ exclusively on the job parameters specified on that restart.
 
 ==== Job XML Substitution during Restart
 
-See section 8.8.1.8 Job Restart Rule.
+See section xref:job-restart-rule[8.8.1.8] Job Restart Rule.
 
-==== Execution Sequence on Restart – Overview
+==== Execution Sequence on Restart - Overview
 
 On the initial execution of a JobInstance, the sequence of execution is
 essentially:
@@ -322,7 +322,7 @@ Properties[] returned by the previous PartitionPlan's
 getPartitionProperties() is not. On a new execution of this step, it is
 the current return value of PartitionPlan#getPartitionProperties() which
 is used to populate the pool of potential 'partitionPlan' substitutions
-(see section 8.8.1.4).
+(see section xref:partitionplan-substitution-operator[8.8.1.4]).
 
 ====== "Numbering" of Partitions via Partition Properties
 
@@ -330,7 +330,7 @@ Upon execution of this step, the batch implementation will associate
 each element of the Properties[] returned by
 PartitionPlan#getPartitionProperties() with a single partition, in order
 to potentially resolve 'partitionPlan' substitutions (see section
-8.8.1.4) for a single partition. During the course of execution of each
+xref:partitionplan-substitution-operator[8.8.1.4]) for a single partition. During the course of execution of each
 partition, the batch implementation will capture data such as checkpoint
 values, persistent user data, etc.
 

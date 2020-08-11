@@ -1262,7 +1262,9 @@ step properties are themselves injectable into that artifact via
 @BatchProperty. This is the case even though these job and step
 properties are available for resolving the artifact-level property
 definitions via the jobProperties substitution mechanism (see section
-8.8.1.2) .
+ xref:jobproperties-substitution-operator[8.8.1.2]) .
+
+
 
 The following example should make this more clear:
 
@@ -1323,8 +1325,8 @@ StepContext, whether or not the execution environment includes an implementation
 Jakarta Dependency Injection.  The batch contexts must always be
 injected, and depending on the specific dependency injection technology
 used, other injections may or may not also be supported.
- See section 10.9.1 for definition of JobContext class. See section
-10.9.2 for definition of StepContext class.
+ See section xref:jobcontext[10.9.1] for definition of JobContext class. See section
+xref:stepcontext[10.9.2] for definition of StepContext class.
 
 ===== Batch Context Lifecycle and Scope
 
@@ -1409,7 +1411,7 @@ public interface PartitionMapper {
 }
 ----
 
-See section 10.9.4 for details on the PartitionPlan result value type.
+See section xref:partitionplan[10.9.4] for details on the PartitionPlan result value type.
 
 The PartitionMapper, when defined, is invoked upon every execution,
 including restarted executions. For a full discussion of the behavior on
