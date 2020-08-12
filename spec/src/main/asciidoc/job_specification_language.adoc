@@ -1290,7 +1290,7 @@ a loop occurs among steps.
 The effort of the initial 1.0 final release specification to define
 split termination processing is recognized as incomplete. This is
 related to the recognition that flow transitioning is incomplete
-(section xref:flow-level-transitions[8.9.5]).
+(section xref:flow-level-transitions-undefined[8.9.5]).
 
 As such, there is no well-defined mechanism for "passing back" status
 from the individual child flows of a split and aggregating them into a
@@ -1714,7 +1714,7 @@ this case).
 Note the implications for restart processing. For example, a completed
 step wont re-run just because the step includes a transition element
 failing the job on the original step executions exit status. See section
-xref:supporting-classes[10.8] for more on restart processing.
+xref:restart-processing[10.8] for more on restart processing.
 
 ==== Exit Status for Partitioned Steps
 
@@ -2148,13 +2148,13 @@ that all the rules in section xref:transitioning-precedence-rules[8.9.2] apply t
 except for rule #3 in section xref:transitioning-precedence-rules[8.9.2] (this case does not necessarily end
 the job).
 
-See the example at the end of section xref:flow-level-transitions[8.9.5] for further clarification.
+See the example at the end of section xref:flow-level-transitions-undefined[8.9.5] for further clarification.
 
 ==== Flow-level Transitions Undefined
 
 It is recognized that the specification is incomplete with respect to
 how exactly flow transition elements are evaluated. Though the list in
-section xref:partitionplan[10.8.4] has an assertion in rule 3.e. that suggests using the
+section xref:execution-sequence-on-restart-detailed-rules[10.8.4] has an assertion in rule 3.e. that suggests using the
 exit status of the last contained execution element as a flow-level exit
 status, this does not seem to be a complete definition. For example,
 what if the last execution element within the flow is a split
@@ -2200,4 +2200,4 @@ the same flow (Item 1. in section xref:transitioning-from-within-flows[8.9.4])
 flow somehow (Item 2. in section xref:transitioning-from-within-flows[8.9.4])
 
 * that a transition element which is a direct child of the flow
-itself is currently UNDEFINED (section xref:flow-level-transitions[8.9.5])
+itself is currently UNDEFINED (section xref:flow-level-transitions-undefined[8.9.5])

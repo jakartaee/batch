@@ -256,7 +256,7 @@ exit status from the new step execution.+
 +
 Note if the step is a partitioned step, only the partitions that did not
 complete previously are restarted. This behavior may be overridden via a
-PartitionMapper (see section xref:batchruntime[10.8.5]).  Note
+PartitionMapper (see section xref:partitionmapper-on-restart[10.8.5]).  Note
 for a partitioned step, the checkpoints and persistent user data are
 loaded from the persistent store on a per-partition basis (this is not a
 new rule, but a fact implied by the discussion of checkpoints in section

@@ -1416,7 +1416,7 @@ See section xref:partitionplan[10.9.4] for details on the PartitionPlan result v
 The PartitionMapper, when defined, is invoked upon every execution,
 including restarted executions. For a full discussion of the behavior on
 restart, including how to override particular details of the
-PartitionPlan built by the previous execution, see section xref:batchruntime[10.8.5].
+PartitionPlan built by the previous execution, see section xref:partitionmapper-on-restart[10.8.5].
 
 ==== PartitionReducer Interface
 
