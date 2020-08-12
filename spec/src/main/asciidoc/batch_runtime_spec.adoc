@@ -84,7 +84,7 @@ an instance or null. +
 +
 The `batch.xml` file is packaged by the developer with the application under the '`META-INF`' directory ('`WEB-INF/classes/META-INF`' for .war files). +
 +
-See xref:job-parameters-on-restart[10.7.1] for more about the `batch.xml` file.
+See xref:meta-infbatch-xml[10.7.1] for more about the `batch.xml` file.
 
 3.  Thread Context Class Loader +
 +
@@ -111,7 +111,7 @@ from the `META-INF/batch-jobs` directory. +
 +
 Job XML documents may be packaged by the developer with the application under the '`META-INF/batch-jobs`' directory ('`WEB-INF/classes/META-INF`/batch-jobs' for .war files). +
 +
-See xref:job-xml-substitution-during-restart[10.7.2] for more about the `META-INF/batch-jobs`.
+See xref:meta-infbatch-jobs[10.7.2] for more about the `META-INF/batch-jobs`.
 
 === Application Packaging Model
 The batch artifacts that comprise a batch application requiring no
@@ -124,7 +124,7 @@ method).
 
 ==== `META-INF/batch.xml`
 
-A batch application may use the archive loader (see section xref:job-xml-loading[10.5]) to
+A batch application may use the archive loader (see section xref:batch-artifact-loading[10.5]) to
 load batch artifacts. The application can direct artifact loading by
 supplying an optional `batch.xml` file. The `batch.xml` file must be stored
 under the `META-INF` directory. For .jar files it is the standard `META-INF`
@@ -151,7 +151,7 @@ batch artifact implementation.
 Notes:
 
 1. If an implementation-specific loader is used (see
-xref:job-xml-loading[10.5]) any artifact it loads takes precedence over artifacts specified in `batch.xml`.
+xref:batch-artifact-loading[10.5]) any artifact it loads takes precedence over artifacts specified in `batch.xml`.
 
 2. Use of `batch.xml` to load batch artifacts requires the
 availability of a zero-argument constructor (either a default
@@ -160,7 +160,7 @@ constructor ).
 
 ==== `META-INF/batch-jobs`
 
-A batch application may use the archive loader (see section xref:application-packaging-model[10.6]) to
+A batch application may use the archive loader (see section xref:job-xml-loading[10.6]) to
 load Job XML documents. The application does this by storing the Job XML
 documents under the `META-INF/batch-jobs` directory. For .jar files the
 batch-jobs directory goes under the standard `META-INF` directory. For
@@ -177,7 +177,7 @@ specified on the JobOperator.start command.
 |.xml |Specifies required file type of a Job XML file under
 `META-INF/batch-jobs`.
 |=======================================================================
-Note if an implementation-specific loader (see xref:application-packaging-model[10.6]) loads a Job XML
+Note if an implementation-specific loader (see xref:job-xml-loading[10.6]) loads a Job XML
 document that document takes precedence over documents stored under
 `META-INF/batch-jobs`.
 
