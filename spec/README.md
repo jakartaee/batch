@@ -17,7 +17,7 @@ Run the full build:
 `mvn install`
 
 Locate the html files:
-- `target/generated-docs/batch-spec-<version>.html`
+- `target/generated-docs/jakarta-batch-spec-<version>.html`
 
 Locate the PDF files:
-- `target/generated-docs/batch-spec-<version>.pdf`
+- `target/generated-docs/jakarta-batch-spec-<version>.pdf`

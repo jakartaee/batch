@@ -23,7 +23,7 @@
     <formats>
 	<format>zip</format>
     </formats>
-    <baseDirectory>batch-spec</baseDirectory>
+    <baseDirectory>jakarta-batch-spec</baseDirectory>
     <fileSets>
 	<fileSet>
 	    <directory>target/generated-docs</directory>
