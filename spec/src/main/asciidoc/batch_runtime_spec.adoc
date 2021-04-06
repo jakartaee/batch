@@ -109,9 +109,9 @@ The purpose of an implementation-specific loader is to enable Job XMLloading fro
 If the implementation-specific mechanism does fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive loader. The implementation must provide an archive loader that resolves the reference by looking up the reference
 from the `META-INF/batch-jobs` directory. +
 +
-Job XML documents may be packaged by the developer with the application under the '`META-INF/batch-jobs`' directory ('`WEB-INF/classes/META-INF`/batch-jobs' for .war files). +
+Job XML documents may be packaged by the developer with the application under the `META-INF/batch-jobs` directory (`WEB-INF/classes/META-INF/batch-jobs` for .war files). +
 +
-See xref:meta-infbatch-jobs[10.7.2] for more about the `META-INF/batch-jobs`.
+See xref:meta-infbatch-jobs[10.7.2] for more about the `META-INF/batch-jobs` directory.
 
 === Application Packaging Model
 The batch artifacts that comprise a batch application requiring no
@@ -163,12 +163,12 @@ constructor ).
 A batch application may use the archive loader (see section xref:job-xml-loading[10.6]) to
 load Job XML documents. The application does this by storing the Job XML
 documents under the `META-INF/batch-jobs` directory. For .jar files the
-batch-jobs directory goes under the standard `META-INF` directory. For
+'batch-jobs' directory goes under the standard `META-INF` directory. For
 .war files it goes under the `WEB-INF/classes/META-INF` directory. Note
 Job XML documents are valid only in the batch-jobs directory:
 sub-directories are ignored.
 Job XML documents stored under `META-INF/batch-jobs` are named with the
-convention ``<name>.xml`,Where:
+convention `<name>.xml`,Where:
 [width="100%",cols="<50%,<50%",]
 |=======================================================================
 |<name> |Specifies the name of a Job XML. This is the value that is
