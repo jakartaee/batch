@@ -117,8 +117,8 @@ See xref:meta-infbatch-jobs[10.7.2] for more about the `META-INF/batch-jobs` dir
 The batch artifacts that comprise a batch application requiring no
 unique packaging. They may be packaged in a standard jar file or can be
 included inside any Java archive type, as supported by the target
-execution platform in question.E.g. batch artifacts may be included in
-wars, EJB jars, etc, so long as they exist in the class loader scope of
+execution platform in question. E.g. batch artifacts may be included in
+wars, Jakarta Enterprise Beans jars, etc, so long as they exist in the class loader scope of
 the program initiating the batch jobs (i.e. using the JobOperator start
 method).
 
