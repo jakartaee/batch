@@ -1864,7 +1864,7 @@ E.g. Given job, job1:
 <job id="job1">
  <step id="step1">
   <chunk>
-   <reader  ref="MyReader>
+   <reader ref="MyReader">
     <properties>
      <property name="infile.name" value="file#\{partitionPlan['myPartitionNumber']}.txt"/>
      <property name="outfile.name" value="#\{partitionPlan['outFile']}"/>
