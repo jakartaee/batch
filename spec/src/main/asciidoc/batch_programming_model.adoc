@@ -1308,10 +1308,10 @@ non-empty property values in the JSL.
 
 ==== Additional requirements for CDI bean instances
 
-===== Producer
+===== Bean
 
-The batch runtime must ensure there is a producer for the BatchProperty-qualifier String type
-with Dependent scope.  It is left undefined whether the application can override with its own producer. 
+The batch runtime must ensure there is a Bean for the BatchProperty-qualifier String type
+with Dependent scope available for injection into batch artifact bean instances.
 
 ===== Properties for Dependent-scoped bean instances
 
@@ -1382,12 +1382,6 @@ Dependent scope.
 
 The batch runtime should cache these Dependent scope instances to provide a view
 of the instance scope to the application aligning with the above section.
-
-(It is left undefined whether the application can override with its own producer,
-but that would seem to contradict the value of leveraging a given batch implementation).
-
-
-
 
 
 === Parallelization

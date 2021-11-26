@@ -82,36 +82,20 @@ and then obtain a contextual reference for this bean for use by the batch runtim
 
 2. CDI Bean - using batch.xml mapping to fully qualified class name (FQCN)
 +
-The implementation must first provide an archive loader that looks up the reference in a `batch.xml` 
+The implementation must first provide an archive class loader that looks up the reference in a `batch.xml` 
 file, map this 'ref' value within `batch.xml` to a FQCN, and then obtain an instance of a Class object of
-this type using the archive loader.
+this type using the archive class loader.
 +
 The batch runtime must next obtain a CDI Bean instance, using this Class instance and the default qualifier
 from the current CDI context, (e.g. using `BeanManager.getBeans(Type beanType)`). 
 Finally, the batch runtime must obtain a contextual reference for this bean for use by the batch runtime.
 
-3. CDI Bean - using FQCN loaded by Thread Context Class Loader (TCCL)
-
-The implementation treats the 'ref' value as a FQCN and uses this class name to obtain an instance of a 
-Class object loaded by the TCCL.
+3. Batch-managed instance - using batch.xml mapping to fully qualified class name (FQCN)
 +
-Just as with 2., the batch runtime must next obtain a CDI Bean instance, using this Class instance and the default qualifier
-from the current CDI context, (e.g. using `BeanManager.getBeans(Type beanType)`). 
-Finally, the batch runtime must obtain a contextual reference for this bean for use by the batch runtime.
-
-4. Batch-managed instance - using batch.xml mapping to fully qualified class name (FQCN)
-
-The implementation must first provide an archive loader that looks up the reference in a `batch.xml` 
+The implementation must first provide an archive class loader that looks up the reference in a `batch.xml` 
 file, map this 'ref' value within `batch.xml` to a FQCN, and then obtain an instance of a Class object of
-this type using the archive loader. The batch runtime creates an instance of this class using a default or explicit no-arg
+this type using the archive class loader. The batch runtime creates an instance of this class using a default or explicit no-arg
 constructor.
-
-5. Batch-managed instance - using FQCN loaded by Thread Context Class Loader (TCCL)
-
-The implementation treats the 'ref' value as a FQCN and uses this class name to obtain an instance of a 
-Class object loaded by the TCCL.  The batch runtime creates an instance of this class using a default or explicit no-arg
-constructor.
-
 
 Notes:
 
@@ -169,9 +153,9 @@ The batch runtime implementation _must_ provide an implementation-specific means
 +
 The purpose of an implementation-specific loader is to enable Job XMLloading from outside of the application archive, such as from a repository, file system, remote cache, or elsewhere.
 
-2.  archive loader +
+2.  archive class loader +
 +
-If the implementation-specific mechanism does fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive loader. The implementation must provide an archive loader that resolves the reference by looking up the reference
+If the implementation-specific mechanism does fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive class loader. The implementation must provide an archive class loader that resolves the reference by looking up the reference
 from the `META-INF/batch-jobs` directory. +
 +
 Job XML documents may be packaged by the developer with the application under the `META-INF/batch-jobs` directory (`WEB-INF/classes/META-INF/batch-jobs` for .war files). +
@@ -189,7 +173,7 @@ method).
 
 ==== `META-INF/batch.xml`
 
-A batch application may use the archive loader (see section xref:batch-artifact-loading[10.5]) to
+A batch application may use the archive class loader (see section xref:batch-artifact-loading[10.5]) to
 load batch artifacts. The application can direct artifact loading by
 supplying an optional `batch.xml` file. The `batch.xml` file must be stored
 under the `META-INF` directory. For .jar files it is the standard `META-INF`
@@ -222,7 +206,7 @@ constructor ).
 
 ==== `META-INF/batch-jobs`
 
-A batch application may use the archive loader (see section xref:job-xml-loading[10.6]) to
+A batch application may use the archive class loader (see section xref:job-xml-loading[10.6]) to
 load Job XML documents. The application does this by storing the Job XML
 documents under the `META-INF/batch-jobs` directory. For .jar files the
 'batch-jobs' directory goes under the standard `META-INF` directory. For
