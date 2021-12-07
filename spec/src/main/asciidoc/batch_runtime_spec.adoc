@@ -155,7 +155,7 @@ The purpose of an implementation-specific loader is to enable Job XMLloading fro
 
 2.  archive class loader +
 +
-If the implementation-specific mechanism does fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive class loader. The implementation must provide an archive class loader that resolves the reference by looking up the reference
+If the implementation-specific mechanism fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive class loader. The implementation must provide an archive class loader that resolves the reference by looking up the reference
 from the `META-INF/batch-jobs` directory. +
 +
 Job XML documents may be packaged by the developer with the application under the `META-INF/batch-jobs` directory (`WEB-INF/classes/META-INF/batch-jobs` for .war files). +

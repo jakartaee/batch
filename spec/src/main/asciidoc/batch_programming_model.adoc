@@ -1147,7 +1147,7 @@ JobListener, and so on.  @BatchProperty is used to assign batch artifact
 property values from Job XML to the batch artifact itself.
 
 Note that @BatchProperty is used with the standard @Inject annotation
-(jakarta.inject.Inject) and is "overloaded" for use in both CDI bean and
+(jakarta.inject.Inject) and is "overloaded" for use in both CDI Bean and
 batch-managed artifact instances (See section xref:batch-artifact-loading[10.5] 
 for more info).  There is substantial overlap across the two cases but there
 are also differences, as detailed in the sections below.
@@ -1203,7 +1203,7 @@ public @interface BatchProperty {
 ----
 
 Note the `@Qualifier` annotation present in the @BatchProperty definitions,
-for use in the case of CDI bean instances.
+for use in the case of CDI Bean instances.
 
 For batch-managed artifact instances, the value of the annotated field is 
 assigned by the batch runtime if a corresponding property element with a 
@@ -1240,7 +1240,7 @@ the String "123".
 A field annotated with the @BatchProperty annotation must not be static
 and must not be final.
 
-==== Scope of property definitions for @BatchProperty Injection
+==== Scope of property definitions for @BatchProperty injection
 
 The rules governing the definition of properties for injection via
 @BatchProperty deserve some extra explanation and an example.
@@ -1306,7 +1306,7 @@ users should not rely on consistent behaviors.
 Instead @BatchProperty injection points in the Java code should correspond to matching 
 non-empty property values in the JSL. 
 
-==== Additional requirements for CDI bean instances
+==== Additional requirements for CDI Bean instances
 
 ===== Bean
 
@@ -1375,7 +1375,7 @@ parent step/thread; there is a distinct StepContext for each sub-thread
 and each StepContext has its own distinct persistent user data for each
 sub-thread.
 
-===== Additional requirements for CDI bean instances
+===== Additional requirements for CDI Bean instances
 
 The batch runtime must ensure there is a producer for the batch context types with
 Dependent scope.
