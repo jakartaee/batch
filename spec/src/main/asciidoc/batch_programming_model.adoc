@@ -1134,7 +1134,7 @@ initiated. Batch properties are string values.
 
 Note batch properties are visible only in the scope in which they are
 defined (see Section xref:scope-of-property-definitions-for-batchproperty-injection[9.3.2]). However batch properties values can be formed from other properties 
-according to Job XML Substitution Rules.  See section xref:job-xml-substitution[8.8] 
+according to Job XML Substitution Rules.  See section xref:job-xml-substitution[8.8]
 for further information on substitution.
 
 ==== @BatchProperty
@@ -1236,17 +1236,15 @@ this example), it assigns the value of the property with name equal to 'fname'
 provided in the job XML to the corresponding @BatchProperty field named 'fname',
 the String "123".
 
-===== Injection in Batch-managed instances
-A field annotated with the @BatchProperty annotation must not be static
-and must not be final.
 
-==== Scope of property definitions for @BatchProperty injection
+
+===== Scope of JSL Property Definitions for @BatchProperty Injection
 
 The rules governing the definition of properties for injection via
 @BatchProperty deserve some extra explanation and an example.
 
 For a given artifact, the only properties that are injectable via
-@BatchProperty are those which are defined at the level of the artifact
+@BatchProperty are those which are defined in JSL at the level of the artifact
 itself (i.e. as children of the "properties" element which is in turn a
 child of the very element defining the artifact: batchlet, reader,
 listener, etc.).
@@ -1274,7 +1272,7 @@ The following example should make this more clear:
  <step id="step1">
   <batchlet ref="MyBatchlet">
    <properties>
-    <property name="y" value="#\{jobProperties['x']}"/>
+    <property name="y" value="#{jobProperties['x']}"/>
    </properties>
 
 ----
@@ -1291,41 +1289,66 @@ The following example should make this more clear:
  @Inject @BatchProperty(name="y");
 ----
 
-==== Unmatched property or empty property value does not necessarily get Java default value 
+==== Requirements for Batch-Managed Batch Artifact Instances
 
-If there is no matching JSL property for a given @BatchProperty name, or if the 
-corresponding JSL property has a value which resolves to the empty string (either 
+A field annotated with the @BatchProperty annotation must not be static
+and must not be final.
+
+==== CDI-Related Batch Property Requirements
+
+===== CDI Bean Must Be Made Available
+
+On a batch execution thread, for a given batch property, the batch runtime must ensure there is a CDI Bean available with the @BatchProperty-qualifier String type, with the batch runtime providing one if necessary.
+
+Note this ensures that a batch artifact loaded as a CDI Bean (see section xref:batch-artifact-loading[10.5]) will have its
+@BatchProperty injection points satisfied, via the CDI implementation, with a CDI Bean for the batch property.
+
+===== Batch Property Values Resolved Based on "current batch artifact" on Thread
+
+A CDI Bean representing a batch property will obtain its String value based on the current thread of execution.
+
+This should not be surprising since two different batch artifacts each with a property named 'myPropName' might have different values,
+depending on how the property is defined in JSL in each artifact's `<properties>` definition.
+
+Once the batch runtime begins to load (see section xref:batch-artifact-loading[10.5]) a batch artifact, that particular artifact
+becomes the "current batch artifact" for the purpose of property resolution.
+
+Any batch property CDI Bean instances created on this same thread, with a given "current batch artifact" will have values defined
+via the jobProperties substitution mechanism (see section xref:jobproperties-substitution-operator[8.8.1.2]), and the set of batch properties
+available will be defined by the rules detailed in
+section xref:scope-of-property-definitions-for-batchproperty-injection[9.3.2.2] for this batch artifact.
+
+===== Consequences And Suggested Patterns
+
+As a consequence of the previous section, an application must be able to get a CDI Bean with a correct view of a batch property by either:
+
+* Statically injecting the batch property Bean into a @Dependent-scoped CDI Bean, (e.g. via a field injection of type: `@Inject @BatchProperty String` within a batch artifact loaded as a CDI Bean).  This assumes the artifact loading will occur on the execution thread.  
+   OR
+* Dynamically accessing the batch property bean via `jakarta.enterprise.inject.Instance#get()` or `javax.enterprise.inject.spi.CDI#select()` from the batch execution thread.
+
+On the other hand if a batch property Bean is statically injected into a normal-scoped Bean like an @ApplicationScoped batch artifact, the batch property Bean
+values may not accurately reflect the property based on the JSL scope associated with the current batch artifact.
+
+It is possible that the batch runtime will provide its batch property Beans with @Dependent-scope in order to implement the above, but strictly
+speaking that is an implementation detail.
+
+
+==== Undefined: unmatched property or empty property value does not necessarily get Java default value
+
+We call out a special, undefined case here.
+
+If there is no matching JSL property for a given @BatchProperty name, or if the
+corresponding JSL property has a value which resolves to the empty string (either
 explicitly set to the empty string literal or resolving to an empty string via property
 substitution, as described in section xref:job-xml-substitution[8.8]), the resulting
-value is undefined by the batch specification. 
+value is undefined by the batch specification.
 
 It might be typical for a batch-managed instance to use the Java default value and
 a CDI implementation to set these @BatchProperty injection points to 'null', but
-users should not rely on consistent behaviors.   
+users should not rely on consistent behaviors.
 
-Instead @BatchProperty injection points in the Java code should correspond to matching 
-non-empty property values in the JSL. 
-
-==== Additional requirements for CDI Bean instances
-
-===== Bean
-
-The batch runtime must ensure there is a Bean for the BatchProperty-qualifier String type
-with Dependent scope available for injection into batch artifact bean instances.
-
-===== Properties for Dependent-scoped bean instances
-
-For Dependent-scoped bean instances, the batch runtime should ensure injection via producer
-of the properties in scope according to the rules in section xref:scope-of-property-definitions-for-batchproperty-injection[9.3.2].
-
-===== Properties for non-Dependent-scoped bean instances undefined
-
-For non-Dependent-scoped bean instances, the batch runtime cannot ensure property values that
-align with the JSL property values. Consider an `@ApplicationScoped` bean which may be created
-at application startup, before the batch runtime has even loaded any job definitions.
-
-Applications must use other methods besides @BatchProperty to parameterize such bean instances,
-in order to ensure support across batch implemenations.
+Instead @BatchProperty injection points in the Java code should correspond to matching
+non-empty property values in the JSL.
 
 === Batch Contexts
 
@@ -1338,10 +1361,11 @@ injected into an application as member variables. There is a context for
 both job and step. The job context represents the entire job. The step
 context represents the current step executing within the job.
 
-==== Batch Contexts
+==== Batch Context Injection
 Batch artifact access to batch contexts is by injection using the
-standard @Inject annotation (jakarta.inject.Inject). A field into which a
-batch context is injected must not be static and must not be final.
+standard @Inject annotation (jakarta.inject.Inject). For a batch-managed (non-CDI Bean)
+artifact, a field into which a batch context is injected must not be static and must not be final.
+
 E.g.:
 
  @Inject JobContext _jctxt;
@@ -1354,12 +1378,18 @@ injected according to the job or step currently executing.
 See section xref:jobcontext[10.9.1] for definition of JobContext class. See section
 xref:stepcontext[10.9.2] for definition of StepContext class.
 
-==== Batch Context Lifecycle and Scope
+==== Batch Context Lifecycle and Scope - Logical View
 
 A batch context has thread affinity and is visible only to the batch
 artifacts executing on that particular thread. A batch context injected
-field may be null when out of scope. Each context type has a distinct
-scope and lifecycle as follows:
+field may be null when out of scope.
+
+We refer to this as the "logical view" of the context to reflect the fact
+that there are differences in the internal implementation details between the cases
+where the batch artifact is or is not loaded as a CDI Bean, since CDI of course
+has its own "scope" constructs.
+
+In the logical view, each context type has a distinct scope and lifecycle as follows:
 
 1.  JobContext +
 +
@@ -1375,13 +1405,29 @@ parent step/thread; there is a distinct StepContext for each sub-thread
 and each StepContext has its own distinct persistent user data for each
 sub-thread.
 
-===== Additional requirements for CDI Bean instances
+==== CDI-related Context Requirements
 
-The batch runtime must ensure there is a producer for the batch context types with
-Dependent scope.
+The batch runtime must ensure that on a batch execution thread, there is a CDI Bean available for each batch context type,
+with the batch runtime providing one if necessary.  A CDI Bean representing a batch context will obtain its backing values
+based on the current thread of execution, when the bean instance is created, providing the logical view of the context
+outlined in the previous section.
 
-The batch runtime should cache these Dependent scope instances to provide a view
-of the instance scope to the application aligning with the above section.
+Note this ensures that a batch artifact loaded as a CDI Bean (see section xref:batch-artifact-loading[10.5]) will have its
+batch context injection points satisfied, via the CDI implementation, with a CDI Bean for the batch context.
+
+===== Consequences And Suggested Patterns
+
+As a consequence of the previous section, an application must be able to get a CDI Bean with a correct view of the current contexts by either:
+
+* Statically injecting the context Bean into a @Dependent-scoped CDI Bean, (e.g. via a field injection of type: `@Inject JobContext` within a batch artifact loaded as a CDI Bean).  This assumes the artifact loading will occur on the execution thread).
+   OR
+* Dynamically accessing the context bean via `jakarta.enterprise.inject.Instance#get()` or `javax.enterprise.inject.spi.CDI#select()` from the batch execution thread.
+
+On the other hand if a context Bean is statically injected into a normal-scoped Bean like an @ApplicationScoped batch artifact, the context Bean
+values may not accurately reflect the logical context of the current execution thread.
+
+It is possible that the batch runtime will provide its context beans with @Dependent-scope in order to implement the above, but strictly
+speaking that is an implementation detail.
 
 
 === Parallelization
