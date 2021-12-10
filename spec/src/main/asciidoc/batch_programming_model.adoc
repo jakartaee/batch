@@ -1130,10 +1130,12 @@ public interface RetryWriteListener {
 Batch applications need a way to receive parameters when a job is
 initiated for execution. Properties can be defined by batch programming
 model artifacts, then have values passed to them when a job is
-initiated. Batch properties are string values.
+initiated. Batch property values originate from string values in the JSL
+and job parameters and are converted to the type of the injection point
+by the batch runtime.
 
 Note batch properties are visible only in the scope in which they are
-defined (see Section xref:scope-of-property-definitions-for-batchproperty-injection[9.3.2]). However batch properties values can be formed from other properties 
+defined (see Section xref:scope-of-jsl-property-definitions-for-batchproperty-injection[9.3.2]). However batch properties values can be formed from other properties
 according to Job XML Substitution Rules.  See section xref:job-xml-substitution[8.8]
 for further information on substitution.
 
@@ -1236,9 +1238,7 @@ this example), it assigns the value of the property with name equal to 'fname'
 provided in the job XML to the corresponding @BatchProperty field named 'fname',
 the String "123".
 
-
-
-===== Scope of JSL Property Definitions for @BatchProperty Injection
+==== Scope of JSL Property Definitions for @BatchProperty Injection
 
 The rules governing the definition of properties for injection via
 @BatchProperty deserve some extra explanation and an example.
@@ -1289,6 +1289,18 @@ The following example should make this more clear:
  @Inject @BatchProperty(name="y");
 ----
 
+==== Conversion from strings to non-String types
+
+In addition to injection points of type String, the batch runtime must also
+support injecting batch property values into injection points of the primitive wrapper types:
+
+  Boolean, Double, Float, Integer, Long, Short
+
+The conversion of the string values dervied from the normal combination of
+job definition and execution parameters, etc., (as detailed in section xref:job-xml-substitution[8.8]) into these
+non-String objects will be performed by the appropriate 'valueOf(String)' static method on the corresponding wrapper
+class, e.g. `Integer.valueOf(String)` for Integer property values.
+
 ==== Requirements for Batch-Managed Batch Artifact Instances
 
 A field annotated with the @BatchProperty annotation must not be static
@@ -1298,7 +1310,9 @@ and must not be final.
 
 ===== CDI Bean Must Be Made Available
 
-On a batch execution thread, for a given batch property, the batch runtime must ensure there is a CDI Bean available with the @BatchProperty-qualifier String type, with the batch runtime providing one if necessary.
+On a batch execution thread, for a given batch property, the batch runtime must ensure there is a CDI Bean available with
+the @BatchProperty-qualifier, for each of the supported batch property types, with the batch runtime providing one 
+if necessary.
 
 Note this ensures that a batch artifact loaded as a CDI Bean (see section xref:batch-artifact-loading[10.5]) will have its
 @BatchProperty injection points satisfied, via the CDI implementation, with a CDI Bean for the batch property.
@@ -1316,7 +1330,7 @@ becomes the "current batch artifact" for the purpose of property resolution.
 Any batch property CDI Bean instances created on this same thread, with a given "current batch artifact" will have values defined
 via the jobProperties substitution mechanism (see section xref:jobproperties-substitution-operator[8.8.1.2]), and the set of batch properties
 available will be defined by the rules detailed in
-section xref:scope-of-property-definitions-for-batchproperty-injection[9.3.2.2] for this batch artifact.
+section xref:scope-of-jsl-property-definitions-for-batchproperty-injection[9.3.2] for this batch artifact.
 
 ===== Consequences And Suggested Patterns
 
