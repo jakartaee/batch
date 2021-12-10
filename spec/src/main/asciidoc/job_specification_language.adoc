@@ -51,6 +51,45 @@ Where:
 |ref |Specifies the name of a batch artifact.
 |============================================
 
+===== Job Level Listener Properties
+
+The 'properties' element may be specified as a child element of the
+job-level listeners element. It is used to pass property values to a
+job listener. Any number of properties may be specified.
+
+Syntax:
+
+[source,xml]
+----
+ <properties>
+  <property name="{property-name}" value="{name-value}"/>
+ </properties>
+----
+
+Where:
+
+[width="100%",cols="<50%,<50%",]
+|=======================================================================
+|name |Specifies a unique property name within the current scope. It
+must be a valid XML string value. If it matches a named property in the
+associated batch artifact, its value is assigned to that property. If
+not, it is ignored. This is a required attribute.
+
+|value |Specifies the value corresponding to the named property. It must
+be a valid XML string value. This is a required attribute.
+|=======================================================================
+
+Example:
+
+[source,xml]
+----
+ <listener ref="{name}">
+  <properties>
+   <property name="Property1" value="Property1-Value"/>
+  </properties>
+ </listener>
+----
+
 ==== Job Level Exception Handling
 
 Any unhandled exception thrown by a job-level listener causes the job to
