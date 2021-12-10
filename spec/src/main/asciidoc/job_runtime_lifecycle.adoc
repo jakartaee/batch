@@ -15,20 +15,9 @@ invocations. Simple symbols are used to denote actions as follows:
 
 === Batch Artifact Lifecycle
 
-All batch artifacts are instantiated prior to their use in the scope in
-which they are declared in the Job XML and are valid for the life of
-their containing scope. There are three scopes that pertain to artifact
-lifecycle: job, step, and step-partition.
-
-One artifact per Job XML reference is instantiated. In the case of a
-partitioned step, one artifact per Job XML reference per partition is
-instantiated. This means job level artifacts are valid for the life of
-the job. Step level artifacts are valid for the life of the step. Step
-level artifacts in a partition are valid for the life of the partition.
-
-No artifact instance may be shared across concurrent scopes. The same
-instance must be used in the applicable scope for a specific Job XML
-reference.
+The information in this section has been moved to section 
+xref:batch-artifact-loading[10.5], where a more complete specification of
+instance lifecycle incorporating CDI integration is provided.
 
 === Job Repository Artifact Lifecycle
 

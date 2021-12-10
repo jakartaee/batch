@@ -26,7 +26,7 @@ include::license-efsl.adoc[]
 
 include::acknowledgements.adoc[]
 
-include::forward.adoc[]
+include::foreword.adoc[]
 
 == Table of Contents
 

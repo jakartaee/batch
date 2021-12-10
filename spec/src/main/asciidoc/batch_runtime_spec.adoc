@@ -63,32 +63,81 @@ See section xref:batchruntime[10.9.5] for details on the BatchRuntime class.
 
 === Batch Artifact Loading
 
-All batch artifacts comprising a batch application are loadable by the
-following loaders in the order specified:
+By "artifact loading" we mean the process by which an instance of a batch API 
+interface or class is obtained by the batch runtime during the execution of the job, from
+the job definition.
 
-1.  Implementation-specific loader +
+In other words, this describes how a reference in a Job XML (using the 'ref' attribute) 
+is resolved to an instance of an implementation class.
+
+==== Required Artifact Loading Sequence
+
+Batch artifacts must be loaded in the order specified:
+
+1. CDI Bean - using 'ref' as EL name
 +
-The batch runtime implementation _may_ provide an
-implementation-specific means by which batch artifacts references in a Job XML (i.e. via the 'ref=' attribute) are resolved to an implementation class and instantiated. When the batch runtime resolves a batch artifact reference to an instance the implementation-specific mechanism (if one exists) is attempted first. The loader must return an
-instance or null. +
+The batch runtime must attempt to pass the 'ref' value as an EL bean name to the
+current CDI context, (e.g. using `BeanManager.getBeans(String name)` to obtain a CDI Bean instance, 
+and then obtain a contextual reference for this bean for use by the batch runtime.
+
+2. CDI Bean - using batch.xml mapping to fully qualified class name (FQCN)
 +
-An example of an implementation-specific loader might be CDI or Spring DI.
-2.  Archive loader +
+The implementation must first provide an archive class loader that looks up the reference in a `batch.xml` 
+file, map this 'ref' value within `batch.xml` to a FQCN, and then obtain an instance of a Class object of
+this type using the archive class loader.
 +
-If an implementation-specific mechanism does not exist or fails toresolve a batch artifact reference (returns null), then the batch
-runtime implementation must resolve the reference with an archive
-loader. The implementation must provide an archive loader that resolves
-the reference by looking up the reference in a `batch.xml` file, which
-maps reference name to implementation class name. The loader must return
-an instance or null. +
+The batch runtime must next obtain a CDI Bean instance, using this Class instance and the default qualifier
+from the current CDI context, (e.g. using `BeanManager.getBeans(Type beanType)`). 
+Finally, the batch runtime must obtain a contextual reference for this bean for use by the batch runtime.
+
+3. Batch-managed instance - using batch.xml mapping to fully qualified class name (FQCN)
 +
-The `batch.xml` file is packaged by the developer with the application under the '`META-INF`' directory ('`WEB-INF/classes/META-INF`' for .war files). +
-+
+The implementation must first provide an archive class loader that looks up the reference in a `batch.xml` 
+file, map this 'ref' value within `batch.xml` to a FQCN, and then obtain an instance of a Class object of
+this type using the archive class loader. The batch runtime creates an instance of this class using a default or explicit no-arg
+constructor.
+
+Notes:
+
+. For CDI loading, ambiguities are resolved normally
+. The `batch.xml` file is packaged by the developer with the application under the '`META-INF`' directory ('`WEB-INF/classes/META-INF`' for .war files).
 See xref:meta-infbatch-xml[10.7.1] for more about the `batch.xml` file.
 
-3.  Thread Context Class Loader +
-+
-If the archive loader fails to resolve a batch artifact reference (returns null), then the batch runtime implementation must resolve the reference by treating the reference as a class name and loading it through the thread context class loader. The loader must return an instance or null.
+==== Implementation-Specific Loading
+
+Finally, an implementation may in addition choose to provide an implementation-specific loading mechanism, as long
+as it supports the required artifact loading schemes.
+
+
+==== Instance Scope - one instance per JSL reference
+
+There are three scopes from the batch lifecycle scopes that pertain to artifact lifecycle: 
+job, step, and step-partition. No matter what type of artifact loading is used, the batch 
+runtime should obtain a single instance or reference from the artifact loader per JSL reference, 
+and then reuse that same instance for the life of the containing scope. (In the case of a partitioned 
+step, one instance or reference per Job XML reference per partition is obtained.)
+
+
+===== Instance Scope Examples
+
+To elaborate and clarify, consider a couple example cases:
+
+Case 1:  A StepListener annotated with the CDI `@Dependent` scope annotation.  
+
+In this case, a single instance is obtained in order to invoke the `beforeStep` method, and this same
+instance is resued by the batch runtime in order to invoke `afterStep`. Although `@Dependent` scope 
+implies a new instance is created by the CDI engine each time a bean instance is needed, the batch
+runtime only requests the single instance for the life of the step. 
+
+Case 2:  A step configured with two `<listener>` elements with the same FQCN 'ref' values, using batch-managed instances
+
+In this case, two different listener instances are instantiated by the batch runtime.  Although both 
+instances will be of the same type and execute in the same step scope, different instances are used.
+(Which makes sense since the only value in doing this is to use different properties on each instance.)
+
+
+===== Batch-Managed Instances Single-threaded
+In addition, a batch-managed instance loaded according to the steps 4 or 5, above, may not be shared across concurrent scopes. 
 
 === Job XML Loading
 
@@ -104,9 +153,9 @@ The batch runtime implementation _must_ provide an implementation-specific means
 +
 The purpose of an implementation-specific loader is to enable Job XMLloading from outside of the application archive, such as from a repository, file system, remote cache, or elsewhere.
 
-2.  archive loader +
+2.  archive class loader +
 +
-If the implementation-specific mechanism does fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive loader. The implementation must provide an archive loader that resolves the reference by looking up the reference
+If the implementation-specific mechanism fails to resolve a Job XML reference, then the batch runtime implementation must resolve the reference with an archive class loader. The implementation must provide an archive class loader that resolves the reference by looking up the reference
 from the `META-INF/batch-jobs` directory. +
 +
 Job XML documents may be packaged by the developer with the application under the `META-INF/batch-jobs` directory (`WEB-INF/classes/META-INF/batch-jobs` for .war files). +
@@ -124,7 +173,7 @@ method).
 
 ==== `META-INF/batch.xml`
 
-A batch application may use the archive loader (see section xref:batch-artifact-loading[10.5]) to
+A batch application may use the archive class loader (see section xref:batch-artifact-loading[10.5]) to
 load batch artifacts. The application can direct artifact loading by
 supplying an optional `batch.xml` file. The `batch.xml` file must be stored
 under the `META-INF` directory. For .jar files it is the standard `META-INF`
@@ -150,17 +199,14 @@ batch artifact implementation.
 |=======================================================================
 Notes:
 
-1. If an implementation-specific loader is used (see
-xref:batch-artifact-loading[10.5]) any artifact it loads takes precedence over artifacts specified in `batch.xml`.
-
-2. Use of `batch.xml` to load batch artifacts requires the
+1. Use of `batch.xml` to load batch artifacts requires the
 availability of a zero-argument constructor (either a default
 constructor or an explicitly-defined, no-arg
 constructor ).
 
 ==== `META-INF/batch-jobs`
 
-A batch application may use the archive loader (see section xref:job-xml-loading[10.6]) to
+A batch application may use the archive class loader (see section xref:job-xml-loading[10.6]) to
 load Job XML documents. The application does this by storing the Job XML
 documents under the `META-INF/batch-jobs` directory. For .jar files the
 'batch-jobs' directory goes under the standard `META-INF` directory. For

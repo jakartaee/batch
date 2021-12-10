@@ -7,7 +7,10 @@ A number of individuals deserve special recognition for their contributions to f
 * Mahesh Kannan
 * Scott Kurz
 * Wayne Lund
+* Romain Manni-Bucau
 * Simon Martinelli
+* Ondro Mihályi
 * Michael Minella
 * Kaushik Mukherjee
 * Joe Pullen
+* Reza Rahman
