@@ -1,5 +1,5 @@
 <!--
-   Copyright 2012, 2020 International Business Machines Corp.
+   Copyright 2012, 2021 International Business Machines Corp.
 
    See the NOTICE file distributed with this work for additional information
    regarding copyright ownership. Licensed under the Apache License,
@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>jakarta.batch</groupId>
     <artifactId>batch-api-parent</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0-M1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>batch-parent</name>
     <description>
@@ -123,15 +123,15 @@
 
         <!-- Building the project -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.java>1.8</version.java>
+        <version.java>11</version.java>
 
         <!-- Dependencies -->
         <version.jakarta.enterprise.jakarta.enterprise.cdi-api>3.0.0</version.jakarta.enterprise.jakarta.enterprise.cdi-api>
-        <version.jakarta.inject.jakarta.inject-api>2.0.0</version.jakarta.inject.jakarta.inject-api>
+        <version.jakarta.inject.jakarta.inject-api>2.0.1</version.jakarta.inject.jakarta.inject-api>
 
         <version.org.sonatype.plugins.nexus-staging-maven-plugin>1.6.6</version.org.sonatype.plugins.nexus-staging-maven-plugin>
         <version.org.apache.maven.plugins.maven-antrun-plugin>1.8</version.org.apache.maven.plugins.maven-antrun-plugin>
-        <version.org.apache.maven.plugins.maven-compiler-plugin>2.0.2</version.org.apache.maven.plugins.maven-compiler-plugin>
+        <version.org.apache.maven.plugins.maven-compiler-plugin>3.8.1</version.org.apache.maven.plugins.maven-compiler-plugin>
         <version.org.apache.maven.plugins.maven-failsafe-plugin>2.18</version.org.apache.maven.plugins.maven-failsafe-plugin>
         <version.org.apache.maven.plugins.maven-jar-plugin>2.4</version.org.apache.maven.plugins.maven-jar-plugin>
         <version.org.apache.maven.plugins.maven-javadoc-plugin>2.9.1</version.org.apache.maven.plugins.maven-javadoc-plugin>
@@ -179,9 +179,30 @@
                     </configuration>
                 </plugin> 
                 <plugin>
-                     <groupId>org.apache.maven.plugins</groupId>
-                     <artifactId>maven-antrun-plugin</artifactId>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
                     <version>${version.org.apache.maven.plugins.maven-antrun-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>1.4.1</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-versions</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireJavaVersion>
+                                        <version>[11.0,12.0)</version>
+                                        <message> ! JDK 11 is required !</message>
+                                    </requireJavaVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                      <groupId>org.apache.maven.plugins</groupId>
