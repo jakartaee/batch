@@ -22,8 +22,19 @@ package jakarta.batch.api.chunk.listener;
  * SkipProcessListener intercepts skippable 
  * itemProcess exception handling.
  *
- * @deprecated Use {@link TypedSkipProcessListener}.
+ * @param <I> item type.
  */
-@Deprecated
-public interface SkipProcessListener extends TypedSkipProcessListener<Object> {
+public interface TypedSkipProcessListener<I> {
+	/**
+	 * The onSkipProcessItem method receives control when 
+	 * a skippable exception is thrown from an ItemProcess
+	 * processItem method.  
+	 * This method receives the exception and the item to process 
+	 * as an input. 
+	 * @param item specifies the item passed to the ItemProcessor.
+	 * @param ex specifies the exception thrown by the 
+	 * ItemProcessor.
+	 * @throws Exception is thrown if an error occurs.
+	 */
+	void onSkipProcessItem(I item, Exception ex) throws Exception;
 }

@@ -18,12 +18,27 @@
  */
 
 package jakarta.batch.api.chunk.listener;
+
+import java.util.List;
+
 /**
- * SkipProcessListener intercepts skippable 
- * itemProcess exception handling.
+ * SkipWriteListener intercepts skippable 
+ * itemWriter exception handling.  
  *
- * @deprecated Use {@link TypedSkipProcessListener}.
+ * @param <I> items type.
  */
-@Deprecated
-public interface SkipProcessListener extends TypedSkipProcessListener<Object> {
+public interface TypedSkipWriteListener<I> {
+	/**
+	 * The onSkipWriteItems method receives control when a 
+	 * skippable exception is thrown from an ItemWriter 
+	 * writeItems method.  This 
+	 * method receives the exception and the items that were 
+	 * skipped as an input. 
+	 * @param items specifies the list of item passed to the 
+	 * item writer.
+	 * @param ex specifies the exception thrown by the 
+	 * ItemWriter. 
+	 * @throws Exception is thrown if an error occurs.
+	 */
+	void onSkipWriteItem(List<I> items, Exception ex) throws Exception;
 }

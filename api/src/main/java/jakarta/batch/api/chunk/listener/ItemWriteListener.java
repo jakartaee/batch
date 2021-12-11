@@ -19,43 +19,12 @@
 
 package jakarta.batch.api.chunk.listener;
 
-import java.util.List;
-
 /**
  * ItemWriteListener intercepts item writer
  * processing. 
  *
+ * @deprecated Use {@link TypedItemWriteListener}.
  */
-public interface ItemWriteListener {
-
-	/**
-	 * The beforeWrite method receives control before 
-	 * an item writer is called to write its items.  The 
-	 * method receives the list of items sent to the item 
-	 * writer as an input.
-	 * @param items specifies the items about to be 
-	 * written.
-	 * @throws Exception is thrown if an error occurs.
-	 */
-	public void beforeWrite(List<Object> items) throws Exception;
-	/**
-	 * The afterWrite method receives control after an 
-	 * item writer writes its items.  The method receives the 
-	 * list of items sent to the item writer as an input.  
-	 * @param items specifies the items written by the item writer.
-	 * @throws Exception is thrown if an error occurs.
-	 */
-	public void afterWrite(List<Object> items) throws Exception;
-	
-	/**
-	 * The onWriteError method receives control after an 
-	 * item writer writeItems throws an exception.  The method 
-	 * receives the list of items sent to the item writer as input. 
-	 * @param items specifies the items which the item writer
-	 * attempted to write.
-	 * @param ex specifies the exception thrown by the item 
-	 * writer.
-	 * @throws Exception is thrown if an error occurs.
-	 */
-	public void onWriteError(List<Object> items, Exception ex) throws Exception;
+@Deprecated
+public interface ItemWriteListener extends TypedItemWriteListener<Object> {
 }
