@@ -131,7 +131,31 @@
                     </execution>
                 </executions>
             </plugin>
-        </plugins>
+            <plugin>
+                <groupId>org.netbeans.tools</groupId>
+                <artifactId>sigtest-maven-plugin</artifactId>
+                <version>1.5</version>
+          <executions>
+            <execution>
+              <id>default-cli</id>
+              <phase>none</phase>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <action>strictcheck</action>
+            <failOnError>true</failOnError>
+            <sigfile>batch.standalone.tck.sig_2.1</sigfile>
+            <packages>jakarta.batch.api.chunk.listener, jakarta.batch.api.chunk, jakarta.batch.api.listener, jakarta.batch.api, jakarta.batch.api.partition, jakarta.batch.operations, jakarta.batch.runtime.context, jakarta.batch.runtime</packages>
+            <ignoreJDKClasses>
+                <include>java.lang.Deprecated</include>
+                <include>java.lang.Throwable</include>
+            </ignoreJDKClasses>
+          </configuration>
+        </plugin>
+      </plugins>
     </build>
 
 </project>
