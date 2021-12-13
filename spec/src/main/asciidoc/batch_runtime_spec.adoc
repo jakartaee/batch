@@ -80,7 +80,7 @@ The batch runtime must attempt to pass the 'ref' value as an EL bean name to the
 current CDI context, (e.g. using `BeanManager.getBeans(String name)` to obtain a CDI Bean instance, 
 and then obtain a contextual reference for this bean for use by the batch runtime.
 
-2. CDI Bean - using batch.xml mapping to fully qualified class name (FQCN)
+2. CDI Bean - using 'ref' and batch.xml to map to fully qualified class name (FQCN)
 +
 The implementation must first provide an archive class loader that looks up the reference in a `batch.xml` 
 file, map this 'ref' value within `batch.xml` to a FQCN, and then obtain an instance of a Class object of
@@ -90,12 +90,22 @@ The batch runtime must next obtain a CDI Bean instance, using this Class instanc
 from the current CDI context, (e.g. using `BeanManager.getBeans(Type beanType)`). 
 Finally, the batch runtime must obtain a contextual reference for this bean for use by the batch runtime.
 
-3. Batch-managed instance - using batch.xml mapping to fully qualified class name (FQCN)
+3. CDI Bean - using 'ref' as fully qualified class name (FQCN)
+
+This is the exact same as the previous step, except the runtime starts from a FQCN rather than using
+batch.xml to map to one. 
+
+4. Batch-managed instance - using batch.xml mapping to fully qualified class name (FQCN)
 +
 The implementation must first provide an archive class loader that looks up the reference in a `batch.xml` 
 file, map this 'ref' value within `batch.xml` to a FQCN, and then obtain an instance of a Class object of
 this type using the archive class loader. The batch runtime creates an instance of this class using a default or explicit no-arg
 constructor.
+
+5. Batch-managed instance - using 'ref' as fully qualified class name (FQCN)
+
+This is the exact same as the previous step, except the runtime starts from a FQCN rather than using
+batch.xml to map to one. 
 
 Notes:
 
@@ -197,12 +207,6 @@ XML.
 |<impl-class-name> |Specifies the fully qualified class name of the
 batch artifact implementation.
 |=======================================================================
-Notes:
-
-1. Use of `batch.xml` to load batch artifacts requires the
-availability of a zero-argument constructor (either a default
-constructor or an explicitly-defined, no-arg
-constructor ).
 
 ==== `META-INF/batch-jobs`
 
