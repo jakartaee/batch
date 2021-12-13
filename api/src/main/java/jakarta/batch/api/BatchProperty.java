@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2020 International Business Machines Corp.
+ * Copyright 2012, 2021 International Business Machines Corp.
  * 
  * See the NOTICE file distributed with this work for additional information
  * regarding copyright ownership. Licensed under the Apache License, 
@@ -28,9 +28,12 @@ import jakarta.enterprise.util.Nonbinding;
 import jakarta.inject.Qualifier;
 
 /**
- * Annotation used by batch artifacts to declare a 
- * field which is injectable via a JSL-defined value
+ * Annotation used by batch artifacts and CDI Beans to declare a field
+ * or other element which is injectable via a JSL-defined value
  * (possibly leveraging Job XML substitutions).
+ *
+ * For a batch-managed artifact, this must be a field.  For a CDI Bean
+ * this element may also be a constructor parameter or method parameter.
  *
  */
 @Qualifier
