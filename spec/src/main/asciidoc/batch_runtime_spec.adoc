@@ -54,12 +54,19 @@ of job repository.
 
 The JobOperator interface provides a set of operations to start, stop,
 restart, and inspect jobs.  See xref:joboperator-3[10.9.7] for detailed description of this
-interface. The JobOperator interface is accessible via a factory
-pattern:
+interface.
+
+A JobOperator instance can be obtained in two ways:
+
+1. Via a factory pattern:
 
  JobOperator jobOper = BatchRuntime.getJobOperator();
 
 See section xref:batchruntime[10.9.5] for details on the BatchRuntime class.
+
+2. Via a CDI Bean, which the batch runtime must provide if necessary
+
+ @Inject JobOperator jobOper;  // E.g. field injection (any CDI injection mechanism can be used)
 
 === Batch Artifact Loading
 
