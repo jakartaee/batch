@@ -64,9 +64,26 @@ A JobOperator instance can be obtained in two ways:
 
 See section xref:batchruntime[10.9.5] for details on the BatchRuntime class.
 
-2. Via a CDI Bean, which the batch runtime must provide if necessary
+2. Via a CDI Bean
 
  @Inject JobOperator jobOper;  // E.g. field injection (any CDI injection mechanism can be used)
+
+==== Precedence and Requirements for Injected JobOperator Bean
+
+As background to the 2.1 specification, note that originally JSR 352 did not specify support for injecting a 
+`JobOperator` Bean via CDI, (along with not defining CDI integration more generally).  Because of this
+applications developed prior to the 2.1 specification may have been designed to provide a JobOperator Bean themselves, 
+in application code/packaging.  
+
+Starting with Jakarta Batch 2.1, if the application does not provide a JobOperator CDI Bean, the implementation is 
+required to provide one.
+
+However this new requirement could lead to an ambigous dependency if a "legacy" application has provided one as well.
+
+In order to maximize backwards compatibility, we specify that a batch implementation must ensure that an
+application-provided JobOperator Bean takes precedence over an implementation-provided one.  The implementation
+must use CDI mechansisms like the `javax.enterprise.inject.spi.Extension` mechanism to register its JobOperator
+Bean only when the application has not provided one.
 
 === Batch Artifact Loading
 
