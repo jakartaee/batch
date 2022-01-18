@@ -18,8 +18,8 @@
  */
 module jakarta.batch {
 
-    // Optional - note this transitively requires jakarta.inject
     requires static jakarta.cdi;
+    requires transitive static jakarta.inject;
 
     exports jakarta.batch.api;
     exports jakarta.batch.api.chunk;
