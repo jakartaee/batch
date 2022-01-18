@@ -18,9 +18,6 @@
  */
 module jakarta.batch {
 
-    // Used in BatchRuntime
-    requires java.logging;
-
     // Optional - note this transitively requires jakarta.inject
     requires static jakarta.cdi;
 
