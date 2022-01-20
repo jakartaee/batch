@@ -1547,9 +1547,9 @@ enable finer control over parallel processing:
 number of partitions and unique properties for each.
 .. PartitionReducer provides a unit of work demarcation around
 partition processing.
-.. PartitionCollector provides a means for merging interrim results
+.. PartitionCollector provides a means for merging interim results
 from individual partitions.
-.. PartitionAnalyzer provides a means to gather interrim and final
+.. PartitionAnalyzer provides a means to gather interim and final
 results from individual partitions for single point of control
 processing and decision making.
 

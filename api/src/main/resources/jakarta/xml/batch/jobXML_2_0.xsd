@@ -34,7 +34,7 @@
         <xs:documentation>
 
             Defines a decimal type used for versioning documents
-            defined via this scheam.  Intended to be identical
+            defined via this schema.  Intended to be identical
             to the "dewey-versionType" dewey decimal restriction
             type defined in
             https://jakarta.ee/xml/ns/jakartaee/jakartaee_9.xsd

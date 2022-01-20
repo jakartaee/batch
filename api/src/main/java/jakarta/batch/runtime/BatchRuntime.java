@@ -21,8 +21,8 @@ package jakarta.batch.runtime;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
 import jakarta.batch.operations.JobOperator;
 
@@ -34,7 +34,7 @@ import jakarta.batch.operations.JobOperator;
 public class BatchRuntime {
 
     private final static String sourceClass = BatchRuntime.class.getName();
-    private final static Logger logger = Logger.getLogger(sourceClass);
+    private final static Logger logger = System.getLogger(sourceClass);
 
 	/**
 	* The getJobOperator factory method returns
@@ -46,8 +46,8 @@ public class BatchRuntime {
 		JobOperator operator = null;
 		if (System.getSecurityManager() == null) {
 			for (JobOperator provider : ServiceLoader.load(JobOperator.class)) {
-				if (logger.isLoggable(Level.FINE)) {
-					logger.fine("Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
+				if (logger.isLoggable(Level.DEBUG)) {
+					logger.log(Level.DEBUG, "Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
 				}
 				operator = provider;
 				break;
@@ -59,8 +59,8 @@ public class BatchRuntime {
 					ServiceLoader<JobOperator> loader = ServiceLoader.load(JobOperator.class);
 					JobOperator returnVal = null;
 					for (JobOperator provider : loader) {
-						if (logger.isLoggable(Level.FINE)) {
-							logger.fine("Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
+						if (logger.isLoggable(Level.DEBUG)) {
+							logger.log(Level.DEBUG, "Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
 						}
 						// Use first one
 						returnVal = provider;
@@ -74,7 +74,7 @@ public class BatchRuntime {
 
 		if (operator == null) {
 			if (logger.isLoggable(Level.WARNING)) {
-				logger.warning("The ServiceLoader was unable to find an implementation for JobOperator. Check classpath for META-INF/services/jakarta.batch.operations.JobOperator file.");
+				logger.log(Level.WARNING, "The ServiceLoader was unable to find an implementation for JobOperator. Check classpath for META-INF/services/jakarta.batch.operations.JobOperator file.");
 			}
 		}
 		return operator;
