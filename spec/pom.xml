@@ -137,8 +137,8 @@
                         <revremark>${status}</revremark>
                         <revdate>${revisiondate}</revdate>
                     </attributes>
+                    <skip>${maven.adoc.skip}</skip>
                 </configuration>
-
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -177,6 +177,7 @@
                             <descriptors>
                                 <descriptor>assembly.xml</descriptor>
                             </descriptors>
+                            <skipAssembly>${maven.adoc.skip}</skipAssembly>
                         </configuration>
                     </execution>
                 </executions>

@@ -117,7 +117,7 @@
                 <configuration>
                     <bottom>
                     <![CDATA[
-                    <p align="left">Copyright &#169; 2018, 2021 Eclipse Foundation.<br>Use is subject to
+                    <p align="left">Copyright &#169; 2018, 2022 Eclipse Foundation.<br>Use is subject to
     <a href="{@docRoot}/doc-files/EFSL.html" target="_top">license terms</a>.]]>
                     </bottom>
                     <docfilessubdirs>true</docfilessubdirs>
@@ -134,30 +134,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.netbeans.tools</groupId>
-                <artifactId>sigtest-maven-plugin</artifactId>
-                <version>1.5</version>
-          <executions>
-            <execution>
-              <id>default-cli</id>
-              <phase>none</phase>
-              <goals>
-                <goal>generate</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <action>strictcheck</action>
-            <failOnError>true</failOnError>
-            <sigfile>batch.standalone.tck.sig_2.1</sigfile>
-            <packages>jakarta.batch.api.chunk.listener, jakarta.batch.api.chunk, jakarta.batch.api.listener, jakarta.batch.api, jakarta.batch.api.partition, jakarta.batch.operations, jakarta.batch.runtime.context, jakarta.batch.runtime</packages>
-            <ignoreJDKClasses>
-                <include>java.lang.Deprecated</include>
-                <include>java.lang.Throwable</include>
-            </ignoreJDKClasses>
-          </configuration>
-        </plugin>
       </plugins>
     </build>
 
