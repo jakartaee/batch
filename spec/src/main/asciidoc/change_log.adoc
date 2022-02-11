@@ -1,5 +1,39 @@
 == Change Log
 
+=== Version 2.1
+
+==== Jakarta Batch + CDI integration
+
+As mentioned in the xref:foreword[Foreword], in the 2.1 version of this specification, we make a significant change in both defining the integration of Jakarta Batch + CDI and requiring support for this integration in order to achieve compliance. 
+
+The most important changes were done in issue:
+
+[width="100%",cols="15%,85%",]
+|=======================================================================
+|https://github.com/eclipse-ee4j/batch-api/issues/46[Issue 46] |Require precedence given to loading batch artifacts as CDI Beans
+|=======================================================================
+
+We also defined several additional details of the Jakarta Batch + CDI integration in the list below:
+
+==== Complete list of Jakarta Batch + CDI integration issues
+
+[width="100%",cols="15%,85%",]
+|=======================================================================
+|https://github.com/eclipse-ee4j/batch-api/issues/17[Issue 17] | Support for CDI injection of JobOperator
+|https://github.com/eclipse-ee4j/batch-api/issues/43[Issue 43] | Support @BatchProperty injection into several primitive wrapper type elements
+|https://github.com/eclipse-ee4j/batch-api/issues/46[Issue 46] | Require precedence given to loading batch artifacts as CDI Beans
+|https://github.com/eclipse-ee4j/batch-api/issues/50[Issue 50] | Support @BatchProperty injection into method parameter and constructor parameter elements for CDI Beans
+|https://github.com/eclipse-ee4j/batch-api/issues/132[Issue 132] | Clarify injection of batch properties and contexts can be done in CDI Beans loaded via "current" batch artifact, e.g. see xref:batch-property-values-resolved-based-on-current-batch-artifact-on-thread[here]
+|https://github.com/eclipse-ee4j/batch-api/issues/190[Issue 190] | Define precedence of app-provided JobOperator Bean over runtime-provided Bean
+|=======================================================================
+
+==== Other misc. issues
+[width="100%",cols="15%,85%",]
+|=======================================================================
+|https://github.com/eclipse-ee4j/batch-api/issues/117[Issue 117] | Added missing xref:job-level-listener-properties[section] for Job Level Listener Properties
+|https://github.com/eclipse-ee4j/batch-api/issues/36[Issue 36] | BatchRuntime.getJobOperator() method returns null in spec document
+|=======================================================================
+
 === Version 1.0 Revision A - Maintenance Release
 
 ==== Note on archived issues - Jakarta Batch 2.0 Update
@@ -19,7 +53,7 @@ Please contact the Jakarta Batch mailing list with concerns.
 
 ==== Version 1.0 Revision A - Change History
 
-[width="100%",cols="<50%,<50%",]
+[width="100%",cols="15%,85%",]
 |=======================================================================
 |Bug 5389 |In Sec. xref:meta-infbatch-xml[10.7.1], should we have said we require a "no-arg" explicit or implicit constructor rather than a "default constructor"
 |Bug 4827 |SPEC: Misspoke on collector role on exit status

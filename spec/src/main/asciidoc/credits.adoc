@@ -3,4 +3,4 @@
 Section 7 Domain Language of Batch, was adapted from Spring Batch
 Reference Documentation:
 
-http://static.springsource.org/spring-batch/trunk/reference/html-single/index.html[http://static.springsource.org/spring-batch/trunk/reference/html-single/index.html]
+https://docs.spring.io/spring-batch/docs/current/reference/html/[https://docs.spring.io/spring-batch/docs/current/reference/html/]
