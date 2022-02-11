@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2021 International Business Machines Corp.
+ * Copyright 2012, 2022 International Business Machines Corp.
  * 
  * See the NOTICE file distributed with this work for additional information
  * regarding copyright ownership. Licensed under the Apache License, 
@@ -30,11 +30,16 @@ import jakarta.inject.Qualifier;
 /**
  * Annotation used by batch artifacts and CDI Beans to declare a field
  * or other element which is injectable via a JSL-defined value
- * (possibly leveraging Job XML substitutions).
+ * (possibly leveraging Job XML substitutions).  Note by "batch
+ * artifact" we mean an implementation of one of the interfaces in one of the 
+ * jakarta.batch.* packages, implementing some portion of a job.
  *
- * For a batch-managed artifact, this must be a field.  For a CDI Bean
- * this element may also be a constructor parameter or method parameter.
+ * For a "batch-managed artifact", (a "batch artifact" loaded by the batch implementation
+ * but not as a CDI Bean), this annotation can only be used on a field. 
  *
+ * For a CDI Bean, which may be a "batch artifact" or may be some other Bean loaded in 
+ * the scope of a batch artifact according to the Jakarta Batch specification, this annotation
+ * may also be used on a constructor parameter or method parameter.
  */
 @Qualifier
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
