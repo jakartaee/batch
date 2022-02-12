@@ -51,8 +51,8 @@ specification is expressly prohibited.
 
 The notice is:
 
-"Copyright (c) 2018, 2020 Eclipse Foundation. This software or
-document includes material copied from or derived from https://jakarta.ee/specifications/batch/2.0/[Jakarta Batch 2.0]."
+"Copyright (c) 2018, 2022 Eclipse Foundation. This software or
+document includes material copied from or derived from https://jakarta.ee/specifications/batch/2.1/[Jakarta Batch 2.1]."
 
 ==== Disclaimers
 

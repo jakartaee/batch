@@ -1,4 +1,4 @@
 == Foreword
 This specification describes the job specification language, Java programming model, and runtime environment for Jakarta Batch. It is designed for use on Jakarta EE platform implementations and in Java SE environments. 
 
-In the 2.1 version of this specification, we make a significant change in both defining the integration of Batch + Jakarta CDI and requiring support for this integration in order to achieve compliance. This represents a shift from the previous stance where we attempted to maintain a neutral view on the particular choice of Dependency Injection (DI) technology.  We make this change in order to take advantage of and better integrate with the full Jakarta platform.
+In the 2.1 version of this specification, we made a significant change in both defining the integration of Batch + Jakarta CDI and requiring support for this integration in order to achieve compliance. This represents a shift from the previous stance where we attempted to maintain a neutral view on the particular choice of Dependency Injection (DI) technology.  We made this change in order to take advantage of and better integrate with the full Jakarta platform.

@@ -23,7 +23,7 @@
     <parent>
         <groupId>jakarta.batch</groupId>
         <artifactId>batch-api-parent</artifactId>
-        <version>2.1.0-M2-SNAPSHOT</version>
+        <version>2.1.0-M2</version>
     </parent>
 
     <groupId>jakarta.batch</groupId>
@@ -137,13 +137,12 @@
                         <revremark>${status}</revremark>
                         <revdate>${revisiondate}</revdate>
                     </attributes>
+                    <skip>${maven.adoc.skip}</skip>
                 </configuration>
-
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.2</version>
                 <configuration>
                     <mavenExecutorId>forked-path</mavenExecutorId>
                     <useReleaseProfile>false</useReleaseProfile>
@@ -164,7 +163,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>${version.org.apache.maven.plugins.maven-assembly-plugin}</version>
                 <inherited>false</inherited>
                 <executions>
                     <execution>
@@ -177,6 +176,7 @@
                             <descriptors>
                                 <descriptor>assembly.xml</descriptor>
                             </descriptors>
+                            <skipAssembly>${maven.adoc.skip}</skipAssembly>
                         </configuration>
                     </execution>
                 </executions>
