@@ -4,7 +4,7 @@
 
 ==== Jakarta Batch + CDI integration
 
-As mentioned in the xref:foreword[Foreword], in the 2.1 version of this specification, we make a significant change in both defining the integration of Jakarta Batch + CDI and requiring support for this integration in order to achieve compliance. 
+As mentioned in the xref:foreword[Foreword], in the 2.1 version of this specification, we made a significant change in both defining the integration of Jakarta Batch + CDI and requiring support for this integration in order to achieve compliance. 
 
 The most important changes were done in issue:
 
