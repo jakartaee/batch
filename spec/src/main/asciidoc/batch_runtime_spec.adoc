@@ -676,11 +676,11 @@ public interface Metric
 {
     public enum MetricType
     {
-        READ_COUNT_, _WRITE_COUNT_,
-        _COMMIT_COUNT_,
-        _ROLLBACK_COUNT_, _READ_SKIP_COUNT_, _PROCESS_SKIP_COUNT_,
-        _FILTER_COUNT_,
-        _WRITE_SKIPCOUNT
+        READ_COUNT, WRITE_COUNT,
+        COMMIT_COUNT,
+        ROLLBACK_COUNT, READ_SKIP_COUNT, PROCESS_SKIP_COUNT,
+        FILTER_COUNT,
+        WRITE_SKIP_COUNT
     }
     /**
     * The getName method returns the metric type.
@@ -921,8 +921,8 @@ package jakarta.batch.runtime;
 */
 public enum BatchStatus
 {
-    STARTING_, _STARTED_, _STOPPING_,
-    _STOPPED_, _FAILED_, _COMPLETED_, _ABANDONED_
+    STARTING, STARTED, STOPPING,
+    STOPPED, FAILED, COMPLETED, ABANDONED
 }
 ----
 

@@ -1174,11 +1174,11 @@ import jakarta.inject.Qualifier;
  */
 @Qualifier
 @Target({
-    ElementType._FIELD_, ElementType._METHOD_,
-    ElementType._PARAMETER_
+    ElementType.FIELD, ElementType.METHOD,
+    ElementType.PARAMETER
 }
 )
-@Retention(RetentionPolicy._RUNTIME_)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface BatchProperty {
     @Nonbinding
     public String name() default "";
@@ -1618,7 +1618,7 @@ package jakarta.batch.api.partition;
 */
 public interface PartitionReducer {
     public enum PartitionStatus {
-        COMMIT_, _ROLLBACK
+        COMMIT, ROLLBACK
     }
     /**
     * The beginPartitionedStep method receives
