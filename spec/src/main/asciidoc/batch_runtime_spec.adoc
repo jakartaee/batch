@@ -680,7 +680,7 @@ public interface Metric
         COMMIT_COUNT,
         ROLLBACK_COUNT, READ_SKIP_COUNT, PROCESS_SKIP_COUNT,
         FILTER_COUNT,
-        WRITE_SKIPCOUNT
+        WRITE_SKIP_COUNT
     }
     /**
     * The getName method returns the metric type.
