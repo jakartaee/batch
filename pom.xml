@@ -44,7 +44,7 @@
         Batch workloads have common requirements, especially operational control, which allow for initiation
         of, and interaction with, batch instances; such interactions include stop and restart.
     </description>
-    <url>https://github.com/eclipse-ee4j/batch-api</url>
+    <url>https://github.com/jakartaee/batch</url>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -54,9 +54,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/eclipse-ee4j/batch-api.git</connection>
-        <developerConnection>scm:git:https://github.com/eclipse-ee4j/batch-api.git</developerConnection>
-        <url>https://github.com/eclipse-ee4j/batch-api</url>
+        <connection>scm:git:https://github.com/jakartaee/batch.git</connection>
+        <developerConnection>scm:git:https://github.com/jakartaee/batch.git</developerConnection>
+        <url>https://github.com/jakartaee/batch</url>
         <tag>HEAD</tag>
     </scm>
 
