@@ -10,7 +10,7 @@ The most important changes were done in issue:
 
 [width="100%",cols="15%,85%",]
 |=======================================================================
-|https://github.com/eclipse-ee4j/batch-api/issues/46[Issue 46] |Require precedence given to loading batch artifacts as CDI Beans
+|https://github.com/jakartaee/batch/issues/46[Issue 46] |Require precedence given to loading batch artifacts as CDI Beans
 |=======================================================================
 
 We also defined several additional details of the Jakarta Batch + CDI integration in the list below:
@@ -19,19 +19,19 @@ We also defined several additional details of the Jakarta Batch + CDI integratio
 
 [width="100%",cols="15%,85%",]
 |=======================================================================
-|https://github.com/eclipse-ee4j/batch-api/issues/17[Issue 17] | Support for CDI injection of JobOperator
-|https://github.com/eclipse-ee4j/batch-api/issues/43[Issue 43] | Support @BatchProperty injection into several primitive wrapper type elements
-|https://github.com/eclipse-ee4j/batch-api/issues/46[Issue 46] | Require precedence given to loading batch artifacts as CDI Beans
-|https://github.com/eclipse-ee4j/batch-api/issues/50[Issue 50] | Support @BatchProperty injection into method parameter and constructor parameter elements for CDI Beans
-|https://github.com/eclipse-ee4j/batch-api/issues/132[Issue 132] | Clarify injection of batch properties and contexts can be done in CDI Beans loaded via "current" batch artifact, e.g. see xref:batch-property-values-resolved-based-on-current-batch-artifact-on-thread[here]
-|https://github.com/eclipse-ee4j/batch-api/issues/190[Issue 190] | Define precedence of app-provided JobOperator Bean over runtime-provided Bean
+|https://github.com/jakartaee/batch/issues/17[Issue 17] | Support for CDI injection of JobOperator
+|https://github.com/jakartaee/batch/issues/43[Issue 43] | Support @BatchProperty injection into several primitive wrapper type elements
+|https://github.com/jakartaee/batch/issues/46[Issue 46] | Require precedence given to loading batch artifacts as CDI Beans
+|https://github.com/jakartaee/batch/issues/50[Issue 50] | Support @BatchProperty injection into method parameter and constructor parameter elements for CDI Beans
+|https://github.com/jakartaee/batch/issues/132[Issue 132] | Clarify injection of batch properties and contexts can be done in CDI Beans loaded via "current" batch artifact, e.g. see xref:batch-property-values-resolved-based-on-current-batch-artifact-on-thread[here]
+|https://github.com/jakartaee/batch/issues/190[Issue 190] | Define precedence of app-provided JobOperator Bean over runtime-provided Bean
 |=======================================================================
 
 ==== Other misc. issues
 [width="100%",cols="15%,85%",]
 |=======================================================================
-|https://github.com/eclipse-ee4j/batch-api/issues/117[Issue 117] | Added missing xref:job-level-listener-properties[section] for Job Level Listener Properties
-|https://github.com/eclipse-ee4j/batch-api/issues/36[Issue 36] | BatchRuntime.getJobOperator() method returns null in spec document
+|https://github.com/jakartaee/batch/issues/117[Issue 117] | Added missing xref:job-level-listener-properties[section] for Job Level Listener Properties
+|https://github.com/jakartaee/batch/issues/36[Issue 36] | BatchRuntime.getJobOperator() method returns null in spec document
 |=======================================================================
 
 === Version 1.0 Revision A - Maintenance Release

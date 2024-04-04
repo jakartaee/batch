@@ -1393,7 +1393,7 @@ As a consequence of the previous section, an application must be able to get a C
 
 * Injecting the batch property Bean into a @Dependent-scoped CDI Bean via any standard CDI mechanism, (e.g. via a field injection of type: `@Inject @BatchProperty String` within a batch artifact loaded as a CDI Bean).  This assumes the artifact loading will occur on the execution thread.  
    OR
-* Dynamically accessing the batch property bean via `jakarta.enterprise.inject.Instance#get()` or `javax.enterprise.inject.spi.CDI#select()` from the batch execution thread.
+* Dynamically accessing the batch property bean via `jakarta.enterprise.inject.Instance#get()` from the batch execution thread.
 
 On the other hand if a batch property Bean is statically injected into a normal-scoped Bean like an @ApplicationScoped batch artifact, the batch property Bean
 values may not accurately reflect the property based on the JSL scope associated with the current batch artifact.

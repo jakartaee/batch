@@ -12,4 +12,4 @@ This specification describes the job specification language, Java programming mo
 https://projects.eclipse.org/projects/ee4j.batch/contact 
 
 ## Contribute
-[Contribution Guide](https://github.com/eclipse-ee4j/batch-api/blob/master/CONTRIBUTING.md)
+[Contribution Guide](https://github.com/jakartaee/batch/blob/master/CONTRIBUTING.md)

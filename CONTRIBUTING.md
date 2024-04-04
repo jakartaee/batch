@@ -19,8 +19,8 @@ more.
 
 The project maintains the following source code repositories:
 
-https://github.com/eclipse-ee4j/batch-api
-https://github.com/eclipse-ee4j/batch-tck
+https://github.com/jakartaee/batch
+https://github.com/jakartaee/batch-tck
 
 ## Eclipse Contributor Agreement
 
