@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, 2020, 2019 International Business Machines Corp.
+ * Copyright 2012, 2025 International Business Machines Corp.
  *
  * See the NOTICE file distributed with this work for additional information
  * regarding copyright ownership. Licensed under the Apache License,
@@ -18,8 +18,6 @@
  */
 package jakarta.batch.runtime;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.ServiceLoader;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -44,32 +42,12 @@ public class BatchRuntime {
 	*/
 	public static JobOperator getJobOperator() {
 		JobOperator operator = null;
-		if (System.getSecurityManager() == null) {
-			for (JobOperator provider : ServiceLoader.load(JobOperator.class)) {
-				if (logger.isLoggable(Level.DEBUG)) {
-					logger.log(Level.DEBUG, "Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
-				}
-				operator = provider;
-				break;
+		for (JobOperator provider : ServiceLoader.load(JobOperator.class)) {
+			if (logger.isLoggable(Level.DEBUG)) {
+				logger.log(Level.DEBUG, "Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
 			}
-		} else {
-			operator = AccessController.doPrivileged(new PrivilegedAction<JobOperator>() {
-				public JobOperator run() {
-
-					ServiceLoader<JobOperator> loader = ServiceLoader.load(JobOperator.class);
-					JobOperator returnVal = null;
-					for (JobOperator provider : loader) {
-						if (logger.isLoggable(Level.DEBUG)) {
-							logger.log(Level.DEBUG, "Loaded JobOperator with class: " + provider.getClass().getCanonicalName());
-						}
-						// Use first one
-						returnVal = provider;
-						break;
-					}
-
-					return returnVal;
-				}
-			});
+			operator = provider;
+			break;
 		}
 
 		if (operator == null) {
