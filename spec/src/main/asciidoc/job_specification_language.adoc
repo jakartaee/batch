@@ -1436,7 +1436,7 @@ is visible to job-level listeners.
 
 Transition elements may be specified in the containment scope of a step,
 flow, or decision (but not a split) to direct job execution sequence or
-to terminate job execution. There are fo ur
+to terminate job execution. There are four
 transition elements:
 
 1.  next - directs execution flow to the next execution element.
